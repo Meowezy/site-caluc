@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { calculateSchedule } from '@/lib/calc';
@@ -29,11 +28,8 @@ export async function POST(request: Request) {
     const result = calculateSchedule(calcReq);
     const pdfBytes = await buildPdfReport({ request: calcReq, result });
 
-    // NextResponse body expects BodyInit. The most portable way here is Blob.
-    // This avoids TS incompatibilities around ArrayBuffer | SharedArrayBuffer.
-    const body = new Blob([pdfBytes], { type: 'application/pdf' });
-
-    return new NextResponse(body, {
+    // Use standard Response: BodyInit supports Uint8Array and is less strict than NextResponse typings.
+    return new Response(pdfBytes, {
       status: 200,
       headers: {
         'content-type': 'application/pdf',
@@ -41,6 +37,6 @@ export async function POST(request: Request) {
       }
     });
   } catch (e: any) {
-    return new NextResponse(e?.message ?? 'Bad Request', { status: 400 });
+    return new Response(e?.message ?? 'Bad Request', { status: 400 });
   }
 }
