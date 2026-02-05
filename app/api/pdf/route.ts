@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import { z } from 'zod';
 
 import { calculateSchedule } from '@/lib/calc';
@@ -28,8 +29,9 @@ export async function POST(request: Request) {
     const result = calculateSchedule(calcReq);
     const pdfBytes = await buildPdfReport({ request: calcReq, result });
 
-    // Use standard Response: BodyInit supports Uint8Array and is less strict than NextResponse typings.
-    return new Response(pdfBytes, {
+    // Vercel/TS may type pdf-lib bytes as Uint8Array<ArrayBufferLike>, which doesn't match BodyInit.
+    // Buffer is compatible with BodyInit in the Node.js runtime.
+    return new Response(Buffer.from(pdfBytes), {
       status: 200,
       headers: {
         'content-type': 'application/pdf',
