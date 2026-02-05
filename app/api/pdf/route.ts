@@ -29,11 +29,9 @@ export async function POST(request: Request) {
     const result = calculateSchedule(calcReq);
     const pdfBytes = await buildPdfReport({ request: calcReq, result });
 
-    // NextResponse body expects BodyInit; convert Uint8Array -> ArrayBuffer (or Buffer)
-    const body = pdfBytes.buffer.slice(
-      pdfBytes.byteOffset,
-      pdfBytes.byteOffset + pdfBytes.byteLength
-    );
+    // NextResponse body expects BodyInit. The most portable way here is Blob.
+    // This avoids TS incompatibilities around ArrayBuffer | SharedArrayBuffer.
+    const body = new Blob([pdfBytes], { type: 'application/pdf' });
 
     return new NextResponse(body, {
       status: 200,
