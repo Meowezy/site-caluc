@@ -56,7 +56,7 @@ export default function RootLayout({
                   <div className="leading-tight">
                     <div className="text-lg font-semibold">КредитПлан</div>
                     <div className="text-sm text-slate-500 dark:text-slate-400">
-                      Калькулятор кредита и ипотеки • PDF • Email
+                      Калькулятор кредита и ипотеки.
                     </div>
                   </div>
                 </div>

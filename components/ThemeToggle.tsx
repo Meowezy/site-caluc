@@ -62,15 +62,18 @@ export default function ThemeToggle() {
 
   const isDark = theme === 'dark';
 
+  // UX: show the icon of the target theme (what will happen on click)
+  const nextIsDark = !isDark;
+
   return (
     <button
       type="button"
       onClick={toggle}
-      className="btn-secondary px-3 py-2"
-      title={isDark ? 'Переключить на светлую тему' : 'Переключить на тёмную тему'}
-      aria-label={isDark ? 'Тёмная тема (нажмите для светлой)' : 'Светлая тема (нажмите для тёмной)'}
+      className="btn-secondary inline-flex h-10 w-10 items-center justify-center p-0"
+      title={nextIsDark ? 'Переключить на тёмную тему' : 'Переключить на светлую тему'}
+      aria-label={nextIsDark ? 'Переключить на тёмную тему' : 'Переключить на светлую тему'}
     >
-      {isDark ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
+      {nextIsDark ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
     </button>
   );
 }

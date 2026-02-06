@@ -1,5 +1,9 @@
 import React from 'react';
 
+/**
+ * Minimal banking-style logomark for "КредитПлан".
+ * Circle + monogram "КП" + subtle growth line.
+ */
 export default function LogoMark({ className }: { className?: string }) {
   return (
     <svg
@@ -9,26 +13,42 @@ export default function LogoMark({ className }: { className?: string }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Rounded square */}
-      <rect x="4" y="4" width="40" height="40" rx="12" className="fill-bank-600" />
+      <defs>
+        <linearGradient id="kp_g" x1="10" y1="10" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#2563eb" />
+          <stop offset="1" stopColor="#1d4ed8" />
+        </linearGradient>
+      </defs>
 
-      {/* House + chart line */}
+      <circle cx="24" cy="24" r="20" fill="url(#kp_g)" />
+      <circle cx="24" cy="24" r="19" stroke="rgba(255,255,255,0.22)" />
+
+      {/* Monogram */}
       <path
-        d="M16 24.5 24 18l8 6.5V34a2 2 0 0 1-2 2H18a2 2 0 0 1-2-2v-9.5Z"
-        className="fill-white"
+        d="M18 16v16M18 24h4.8l3.2-4.2"
+        stroke="white"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         opacity="0.95"
       />
       <path
-        d="M18 30.5l4-4 3 3 5-6"
+        d="M27 32V16m0 8.5c1.2-1.5 2.6-2.3 4.4-2.3 2 0 3.6 1 3.6 3.7V32"
         stroke="white"
-        strokeWidth="2.5"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.95"
+      />
+
+      {/* subtle growth line */}
+      <path
+        d="M14.5 31.5l6-6 4 4 8-9"
+        stroke="rgba(255,255,255,0.75)"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="18" cy="30.5" r="1.5" fill="white" />
-      <circle cx="22" cy="26.5" r="1.5" fill="white" />
-      <circle cx="25" cy="29.5" r="1.5" fill="white" />
-      <circle cx="30" cy="23.5" r="1.5" fill="white" />
     </svg>
   );
 }

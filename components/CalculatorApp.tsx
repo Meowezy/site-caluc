@@ -48,6 +48,15 @@ function parseRate(input: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+function formatTerm(months: number) {
+  const years = Math.floor(months / 12);
+  const m = months % 12;
+  const yearsPart = years > 0 ? `${years} ${years === 1 ? 'год' : years < 5 ? 'года' : 'лет'}` : '';
+  const monthsPart = m > 0 ? `${m} мес.` : '';
+  const main = [yearsPart, monthsPart].filter(Boolean).join(' ');
+  return `${main || `${months} мес.`} (${months} мес.)`;
+}
+
 export default function CalculatorApp() {
   const [principal, setPrincipal] = useState(3_000_000);
   const [annualRateInput, setAnnualRateInput] = useState('14');
@@ -325,8 +334,8 @@ export default function CalculatorApp() {
               >
                 Сбросить
               </button>
-              <button className="btn-secondary" onClick={addEarlyPayment}>
-                + Добавить
+              <button className="btn" onClick={addEarlyPayment}>
+                Добавить
               </button>
             </div>
           </div>
@@ -426,20 +435,20 @@ export default function CalculatorApp() {
 
           {result ? (
             <div className="mt-4 space-y-5">
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div className="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400">Переплата по процентам</div>
-                  <div className="mt-1 text-lg font-semibold">
+                  <div className="mt-2 text-xl font-semibold">
                     {formatMoney(result.summary.totalInterest)}
                   </div>
                 </div>
-                <div className="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+                <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400">Всего к оплате</div>
-                  <div className="mt-1 text-lg font-semibold">{formatMoney(result.summary.totalPaid)}</div>
+                  <div className="mt-2 text-xl font-semibold">{formatMoney(result.summary.totalPaid)}</div>
                 </div>
-                <div className="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+                <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400">Фактический срок</div>
-                  <div className="mt-1 text-lg font-semibold">{result.summary.actualMonths} мес.</div>
+                  <div className="mt-2 text-xl font-semibold">{formatTerm(result.summary.actualMonths)}</div>
                 </div>
               </div>
 
