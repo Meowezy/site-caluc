@@ -13,7 +13,6 @@ import {
   Filler,
   type ChartOptions
 } from 'chart.js';
-import zoomPlugin from 'chartjs-plugin-zoom';
 import { Bar, Line } from 'react-chartjs-2';
 
 import type { Chart as ChartInstance } from 'chart.js';
@@ -27,8 +26,7 @@ ChartJS.register(
   BarElement,
   Tooltip,
   Legend,
-  Filler,
-  zoomPlugin
+  Filler
 );
 
 function isDarkNow() {
@@ -38,12 +36,25 @@ function isDarkNow() {
 
 export default function ScheduleCharts({ rows }: { rows: ScheduleRow[] }) {
   const [dark, setDark] = useState(false);
+  const [zoomReady, setZoomReady] = useState(false);
 
   const balanceRef = useRef<ChartInstance<'line'> | null>(null);
   const paymentsRef = useRef<ChartInstance<'bar'> | null>(null);
 
   useEffect(() => {
     setDark(isDarkNow());
+
+    // Dynamically register zoom plugin on client only (avoids "window is not defined" during prerender).
+    import('chartjs-plugin-zoom')
+      .then((m: any) => {
+        ChartJS.register(m.default ?? m);
+        setZoomReady(true);
+      })
+      .catch(() => {
+        // zoom is optional
+        setZoomReady(false);
+      });
+
     const root = document.documentElement;
     const obs = new MutationObserver(() => setDark(isDarkNow()));
     obs.observe(root, { attributes: true, attributeFilter: ['class'] });
@@ -127,18 +138,22 @@ export default function ScheduleCharts({ rows }: { rows: ScheduleRow[] }) {
           labels: { color: palette.text }
         },
         tooltip: { enabled: true },
-        zoom: {
-          pan: {
-            enabled: true,
-            mode: 'x',
-            modifierKey: 'ctrl'
-          },
-          zoom: {
-            wheel: { enabled: true },
-            pinch: { enabled: true },
-            mode: 'x'
-          }
-        }
+        ...(zoomReady
+          ? {
+              zoom: {
+                pan: {
+                  enabled: true,
+                  mode: 'x',
+                  modifierKey: 'ctrl'
+                },
+                zoom: {
+                  wheel: { enabled: true },
+                  pinch: { enabled: true },
+                  mode: 'x'
+                }
+              }
+            }
+          : {})
       },
       scales: {
         x: {
@@ -151,7 +166,7 @@ export default function ScheduleCharts({ rows }: { rows: ScheduleRow[] }) {
         }
       }
     }),
-    [palette]
+    [palette, zoomReady]
   );
 
   function resetZoom() {
