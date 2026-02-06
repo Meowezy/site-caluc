@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { z } from 'zod';
 
+import { addMonths } from 'date-fns';
+
 import type { CalcRequest, CalcResponse, EarlyPayment } from '@/lib/types';
 import ScheduleCharts from '@/components/ScheduleCharts';
 import ScheduleTable from '@/components/ScheduleTable';
@@ -20,7 +22,9 @@ const requestSchema = z.object({
     z.object({
       id: z.string(),
       amount: z.number().positive('Сумма досрочного платежа должна быть больше 0'),
+      whenType: z.enum(['MONTH_INDEX', 'MONTH']).optional(),
       monthIndex: z.number().int().min(1),
+      monthISO: z.string().optional(),
       mode: z.enum(['REDUCE_TERM', 'REDUCE_PAYMENT']),
       repeat: z.enum(['ONCE', 'MONTHLY', 'QUARTERLY', 'UNTIL_END']).default('ONCE')
     })
@@ -41,6 +45,7 @@ export default function CalculatorApp() {
   const [termYears, setTermYears] = useState(20);
   const [termMonthsExtra, setTermMonthsExtra] = useState(0);
   const [paymentType, setPaymentType] = useState<'ANNUITY' | 'DIFFERENTIATED'>('ANNUITY');
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [earlyPayments, setEarlyPayments] = useState<EarlyPayment[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CalcResponse | null>(null);
@@ -60,6 +65,7 @@ export default function CalculatorApp() {
       if (parsed.paymentType === 'ANNUITY' || parsed.paymentType === 'DIFFERENTIATED') {
         setPaymentType(parsed.paymentType);
       }
+      if (typeof parsed.startDate === 'string') setStartDate(parsed.startDate);
       if (Array.isArray(parsed.earlyPayments)) setEarlyPayments(parsed.earlyPayments);
     } catch {
       // ignore
@@ -70,9 +76,51 @@ export default function CalculatorApp() {
   useEffect(() => {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ principal, annualRate, termYears, termMonthsExtra, paymentType, earlyPayments })
+      JSON.stringify({
+        principal,
+        annualRate,
+        termYears,
+        termMonthsExtra,
+        paymentType,
+        startDate,
+        earlyPayments
+      })
     );
-  }, [principal, annualRate, termYears, termMonthsExtra, paymentType, earlyPayments]);
+  }, [principal, annualRate, termYears, termMonthsExtra, paymentType, startDate, earlyPayments]);
+
+  function toMonthIndexFromMonthISO(startDateISO: string, monthISO: string): number {
+    // monthISO: YYYY-MM
+    const [y, m] = monthISO.split('-').map((x) => Number(x));
+    if (!y || !m) return 1;
+
+    const start = new Date(startDateISO + 'T00:00:00');
+    const startMonth = new Date(start.getFullYear(), start.getMonth(), 1);
+    const targetMonth = new Date(y, m - 1, 1);
+
+    const diff =
+      (targetMonth.getFullYear() - startMonth.getFullYear()) * 12 +
+      (targetMonth.getMonth() - startMonth.getMonth());
+
+    return Math.max(1, diff + 1);
+  }
+
+  function normalizeEarlyPaymentsForApi(eps: EarlyPayment[]): EarlyPayment[] {
+    return eps.map((ep) => {
+      const monthIndex =
+        ep.whenType === 'MONTH' && ep.monthISO && startDate
+          ? toMonthIndexFromMonthISO(startDate, ep.monthISO)
+          : Math.max(1, Math.floor(ep.monthIndex || 1));
+
+      // Strip UI-only fields (whenType, monthISO) before sending to API.
+      return {
+        id: ep.id,
+        amount: ep.amount,
+        monthIndex,
+        mode: ep.mode,
+        repeat: ep.repeat
+      };
+    });
+  }
 
   async function calculate() {
     setError(null);
@@ -83,8 +131,8 @@ export default function CalculatorApp() {
       annualRate,
       termMonths,
       paymentType,
-      earlyPayments,
-      startDate: new Date().toISOString().slice(0, 10)
+      earlyPayments: normalizeEarlyPaymentsForApi(earlyPayments),
+      startDate
     };
 
     const validation = requestSchema.safeParse(req);
@@ -115,14 +163,16 @@ export default function CalculatorApp() {
     }, 250);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [principal, annualRate, termMonths, paymentType, earlyPayments]);
+  }, [principal, annualRate, termMonths, paymentType, startDate, earlyPayments]);
 
   function addEarlyPayment() {
     const id = crypto.randomUUID();
     const next: EarlyPayment = {
       id,
       amount: 50_000,
+      whenType: 'MONTH_INDEX',
       monthIndex: 1,
+      monthISO: addMonths(new Date(startDate + 'T00:00:00'), 0).toISOString().slice(0, 7),
       mode: 'REDUCE_TERM',
       repeat: 'ONCE'
     };
@@ -155,26 +205,42 @@ export default function CalculatorApp() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <div className="label">Срок (лет)</div>
-                <input
-                  className="input"
-                  inputMode="numeric"
-                  value={termYears}
-                  onChange={(e) => setTermYears(Number(e.target.value))}
-                />
+            <div>
+              <div className="label">Срок</div>
+              <div className="hint">Укажите годы и дополнительные месяцы.</div>
+              <div className="mt-1 grid grid-cols-2 gap-3">
+                <div>
+                  <input
+                    className="input"
+                    inputMode="numeric"
+                    value={termYears}
+                    onChange={(e) => setTermYears(Number(e.target.value))}
+                    aria-label="Срок (лет)"
+                    placeholder="Лет"
+                  />
+                </div>
+                <div>
+                  <input
+                    className="input"
+                    inputMode="numeric"
+                    value={termMonthsExtra}
+                    onChange={(e) => setTermMonthsExtra(Number(e.target.value))}
+                    aria-label="Срок (мес.)"
+                    placeholder="Месяцев"
+                  />
+                </div>
               </div>
-              <div>
-                <div className="label">Срок (мес.)</div>
-                <div className="hint">Дополнительно к годам.</div>
-                <input
-                  className="input"
-                  inputMode="numeric"
-                  value={termMonthsExtra}
-                  onChange={(e) => setTermMonthsExtra(Number(e.target.value))}
-                />
-              </div>
+            </div>
+
+            <div>
+              <div className="label">Дата начала</div>
+              <div className="hint">Нужна для отображения дат в графике и отчёте.</div>
+              <input
+                className="input"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
             </div>
 
             <div>
@@ -234,22 +300,46 @@ export default function CalculatorApp() {
 
           <div className="mt-4 space-y-3">
             {earlyPayments.length === 0 ? (
-              <div className="text-sm text-slate-500">Досрочных платежей пока нет.</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">Досрочных платежей пока нет.</div>
             ) : null}
 
             {earlyPayments.map((ep) => (
-              <div key={ep.id} className="rounded-xl border border-slate-200 p-3">
+              <div key={ep.id} className="rounded-xl border border-slate-200 p-3 dark:border-slate-800">
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
                   <div>
-                    <div className="label">Месяц</div>
-                    <input
-                      className="input"
-                      inputMode="numeric"
-                      value={ep.monthIndex}
-                      onChange={(e) =>
-                        updateEarlyPayment(ep.id, { monthIndex: Number(e.target.value) })
-                      }
-                    />
+                    <div className="label">Когда</div>
+                    <div className="mt-1 grid grid-cols-2 gap-2">
+                      <select
+                        className="select"
+                        value={ep.whenType ?? 'MONTH_INDEX'}
+                        onChange={(e) =>
+                          updateEarlyPayment(ep.id, {
+                            whenType: e.target.value as any
+                          })
+                        }
+                      >
+                        <option value="MONTH_INDEX">Месяц №</option>
+                        <option value="MONTH">Месяц (дата)</option>
+                      </select>
+
+                      {(ep.whenType ?? 'MONTH_INDEX') === 'MONTH' ? (
+                        <input
+                          className="input"
+                          type="month"
+                          value={ep.monthISO ?? startDate.slice(0, 7)}
+                          onChange={(e) => updateEarlyPayment(ep.id, { monthISO: e.target.value })}
+                        />
+                      ) : (
+                        <input
+                          className="input"
+                          inputMode="numeric"
+                          value={ep.monthIndex}
+                          onChange={(e) =>
+                            updateEarlyPayment(ep.id, { monthIndex: Number(e.target.value) })
+                          }
+                        />
+                      )}
+                    </div>
                   </div>
                   <div>
                     <div className="label">Сумма</div>
@@ -304,18 +394,18 @@ export default function CalculatorApp() {
           {result ? (
             <div className="mt-4 space-y-5">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div className="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200">
-                  <div className="text-xs text-slate-500">Переплата по процентам</div>
+                <div className="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+                  <div className="text-xs text-slate-500 dark:text-slate-400">Переплата по процентам</div>
                   <div className="mt-1 text-lg font-semibold">
                     {formatMoney(result.summary.totalInterest)}
                   </div>
                 </div>
-                <div className="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200">
-                  <div className="text-xs text-slate-500">Всего к оплате</div>
+                <div className="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+                  <div className="text-xs text-slate-500 dark:text-slate-400">Всего к оплате</div>
                   <div className="mt-1 text-lg font-semibold">{formatMoney(result.summary.totalPaid)}</div>
                 </div>
-                <div className="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200">
-                  <div className="text-xs text-slate-500">Фактический срок</div>
+                <div className="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+                  <div className="text-xs text-slate-500 dark:text-slate-400">Фактический срок</div>
                   <div className="mt-1 text-lg font-semibold">{result.summary.actualMonths} мес.</div>
                 </div>
               </div>
@@ -326,8 +416,8 @@ export default function CalculatorApp() {
                   annualRate,
                   termMonths,
                   paymentType,
-                  earlyPayments,
-                  startDate: new Date().toISOString().slice(0, 10)
+                  earlyPayments: normalizeEarlyPaymentsForApi(earlyPayments),
+                  startDate
                 }}
               />
 
@@ -341,7 +431,7 @@ export default function CalculatorApp() {
               </div>
             </div>
           ) : (
-            <div className="mt-3 text-sm text-slate-500">
+            <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
               Нажмите «Рассчитать», чтобы получить график платежей.
             </div>
           )}
