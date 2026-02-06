@@ -39,9 +39,18 @@ function formatMoney(v: number) {
   }).format(v);
 }
 
+function parseRate(input: string): number | null {
+  const s = input.trim().replace(',', '.');
+  if (!s) return null;
+  // allow trailing dot like "12." while typing
+  if (/^\d+\.$/.test(s)) return Number(s.slice(0, -1));
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
+}
+
 export default function CalculatorApp() {
   const [principal, setPrincipal] = useState(3_000_000);
-  const [annualRate, setAnnualRate] = useState(14);
+  const [annualRateInput, setAnnualRateInput] = useState('14');
   const [termYears, setTermYears] = useState(20);
   const [termMonthsExtra, setTermMonthsExtra] = useState(0);
   const [paymentType, setPaymentType] = useState<'ANNUITY' | 'DIFFERENTIATED'>('ANNUITY');
@@ -59,7 +68,8 @@ export default function CalculatorApp() {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (typeof parsed.principal === 'number') setPrincipal(parsed.principal);
-      if (typeof parsed.annualRate === 'number') setAnnualRate(parsed.annualRate);
+      if (typeof parsed.annualRate === 'number') setAnnualRateInput(String(parsed.annualRate));
+      if (typeof parsed.annualRateInput === 'string') setAnnualRateInput(parsed.annualRateInput);
       if (typeof parsed.termYears === 'number') setTermYears(parsed.termYears);
       if (typeof parsed.termMonthsExtra === 'number') setTermMonthsExtra(parsed.termMonthsExtra);
       if (parsed.paymentType === 'ANNUITY' || parsed.paymentType === 'DIFFERENTIATED') {
@@ -78,7 +88,8 @@ export default function CalculatorApp() {
       STORAGE_KEY,
       JSON.stringify({
         principal,
-        annualRate,
+        annualRate: parseRate(annualRateInput) ?? 0,
+        annualRateInput,
         termYears,
         termMonthsExtra,
         paymentType,
@@ -86,7 +97,7 @@ export default function CalculatorApp() {
         earlyPayments
       })
     );
-  }, [principal, annualRate, termYears, termMonthsExtra, paymentType, startDate, earlyPayments]);
+  }, [principal, annualRateInput, termYears, termMonthsExtra, paymentType, startDate, earlyPayments]);
 
   function toMonthIndexFromMonthISO(startDateISO: string, monthISO: string): number {
     // monthISO: YYYY-MM
@@ -126,6 +137,12 @@ export default function CalculatorApp() {
     setError(null);
     setResult(null);
 
+    const annualRate = parseRate(annualRateInput);
+    if (annualRate === null) {
+      setError('Введите корректную процентную ставку');
+      return;
+    }
+
     const req: CalcRequest = {
       principal,
       annualRate,
@@ -163,7 +180,7 @@ export default function CalculatorApp() {
     }, 250);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [principal, annualRate, termMonths, paymentType, startDate, earlyPayments]);
+  }, [principal, annualRateInput, termMonths, paymentType, startDate, earlyPayments]);
 
   function addEarlyPayment() {
     const id = crypto.randomUUID();
@@ -249,8 +266,8 @@ export default function CalculatorApp() {
               <input
                 className="input"
                 inputMode="decimal"
-                value={annualRate}
-                onChange={(e) => setAnnualRate(Number(e.target.value))}
+                value={annualRateInput}
+                onChange={(e) => setAnnualRateInput(e.target.value)}
               />
             </div>
 
@@ -273,11 +290,18 @@ export default function CalculatorApp() {
               <button
                 className="btn-secondary"
                 onClick={() => {
-                  setEarlyPayments([]);
+                  setError(null);
                   setResult(null);
+                  setPrincipal(3_000_000);
+                  setAnnualRateInput('14');
+                  setTermYears(20);
+                  setTermMonthsExtra(0);
+                  setPaymentType('ANNUITY');
+                  setStartDate(new Date().toISOString().slice(0, 10));
+                  setEarlyPayments([]);
                 }}
               >
-                Сбросить досрочные
+                Сбросить
               </button>
             </div>
 
@@ -293,9 +317,18 @@ export default function CalculatorApp() {
                 Укажите месяц (1 = первый платёж), сумму и режим пересчёта.
               </div>
             </div>
-            <button className="btn-secondary" onClick={addEarlyPayment}>
-              + Добавить
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                className="btn-secondary"
+                onClick={() => setEarlyPayments([])}
+                disabled={earlyPayments.length === 0}
+              >
+                Сбросить
+              </button>
+              <button className="btn-secondary" onClick={addEarlyPayment}>
+                + Добавить
+              </button>
+            </div>
           </div>
 
           <div className="mt-4 space-y-3">
@@ -413,7 +446,7 @@ export default function CalculatorApp() {
               <ExportPanel
                 calcRequest={{
                   principal,
-                  annualRate,
+                  annualRate: parseRate(annualRateInput) ?? 0,
                   termMonths,
                   paymentType,
                   earlyPayments: normalizeEarlyPaymentsForApi(earlyPayments),
