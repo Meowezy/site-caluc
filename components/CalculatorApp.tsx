@@ -215,8 +215,8 @@ export default function CalculatorApp() {
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-      <div className="space-y-6 lg:col-span-5">
-        <div className="card p-5 md:p-6">
+      <div className="space-y-5 lg:col-span-5">
+        <div className="card p-4 md:p-5">
           <div className="text-base font-semibold">Параметры кредита</div>
 
           <div className="mt-4 grid grid-cols-1 gap-4">
@@ -318,7 +318,7 @@ export default function CalculatorApp() {
           </div>
         </div>
 
-        <div className="card p-5 md:p-6">
+        <div className="card p-4 md:p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
               <div className="text-base font-semibold">Досрочные погашения</div>

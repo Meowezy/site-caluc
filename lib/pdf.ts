@@ -2,12 +2,33 @@ import { PDFDocument, StandardFonts, rgb, type PDFPage } from 'pdf-lib';
 
 import type { CalcRequest, CalcResponse, ScheduleRow } from '@/lib/types';
 
-function formatMoney(v: number) {
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'RUB',
+function formatMoneyPdf(v: number) {
+  // Avoid non-WinAnsi symbols (like "₽") to keep StandardFonts compatible.
+  const num = new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(v);
+  return `${num} RUB`;
+}
+
+// WinAnsi safe text: transliterate Russian -> Latin (best-effort)
+const RU_MAP: Record<string, string> = {
+  А: 'A', Б: 'B', В: 'V', Г: 'G', Д: 'D', Е: 'E', Ё: 'E', Ж: 'Zh', З: 'Z', И: 'I', Й: 'Y',
+  К: 'K', Л: 'L', М: 'M', Н: 'N', О: 'O', П: 'P', Р: 'R', С: 'S', Т: 'T', У: 'U', Ф: 'F',
+  Х: 'Kh', Ц: 'Ts', Ч: 'Ch', Ш: 'Sh', Щ: 'Sch', Ъ: '', Ы: 'Y', Ь: '', Э: 'E', Ю: 'Yu', Я: 'Ya',
+  а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i', й: 'y',
+  к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f',
+  х: 'kh', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya'
+};
+
+function safeText(s: string) {
+  // Replace unsupported characters with transliteration.
+  // Also normalize quotes.
+  return s
+    .replace(/[«»]/g, '"')
+    .split('')
+    .map((ch) => RU_MAP[ch] ?? ch)
+    .join('');
 }
 
 type PdfCtx = {
@@ -20,8 +41,7 @@ type PdfCtx = {
 };
 
 function addPage(ctx: PdfCtx) {
-  const page = ctx.pdfDoc.addPage([595.28, 841.89]); // A4 portrait
-  return page;
+  return ctx.pdfDoc.addPage([595.28, 841.89]); // A4 portrait
 }
 
 function drawTitleBlock(params: {
@@ -39,7 +59,7 @@ function drawTitleBlock(params: {
   const drawText = (text: string, options?: { bold?: boolean; size?: number; color?: any }) => {
     const size = options?.size ?? 12;
     const f = options?.bold ? fontBold : font;
-    page.drawText(text, {
+    page.drawText(safeText(text), {
       x: margin,
       y,
       size,
@@ -49,23 +69,21 @@ function drawTitleBlock(params: {
     y -= size + 6;
   };
 
-  drawText('Калькулятор кредита и ипотеки — отчёт', { bold: true, size: 16 });
+  drawText('KreditPlan — otchet', { bold: true, size: 16 });
   y -= 6;
 
-  drawText(`Сумма: ${formatMoney(request.principal)}`);
-  drawText(`Срок (план): ${request.termMonths} мес.`);
-  drawText(`Ставка: ${request.annualRate}% годовых`);
-  drawText(
-    `Тип платежей: ${request.paymentType === 'ANNUITY' ? 'Аннуитет' : 'Дифференцированный'}`
-  );
-  if (request.startDate) drawText(`Дата начала: ${request.startDate}`);
+  drawText(`Summa: ${formatMoneyPdf(request.principal)}`);
+  drawText(`Srok (plan): ${request.termMonths} mes.`);
+  drawText(`Stavka: ${request.annualRate}% godovyh`);
+  drawText(`Tip platezhey: ${request.paymentType === 'ANNUITY' ? 'Annuitet' : 'Differenc.'}`);
+  if (request.startDate) drawText(`Data nachala: ${request.startDate}`);
 
   y -= 10;
-  drawText('Итоги', { bold: true, size: 14 });
-  drawText(`Переплата по процентам: ${formatMoney(result.summary.totalInterest)}`);
-  drawText(`Досрочные платежи: ${formatMoney(result.summary.totalEarlyPayments)}`);
-  drawText(`Всего к оплате: ${formatMoney(result.summary.totalPaid)}`);
-  drawText(`Фактический срок: ${result.summary.actualMonths} мес.`);
+  drawText('Itogi', { bold: true, size: 14 });
+  drawText(`Procenty: ${formatMoneyPdf(result.summary.totalInterest)}`);
+  drawText(`Dosrochnye: ${formatMoneyPdf(result.summary.totalEarlyPayments)}`);
+  drawText(`Vsego: ${formatMoneyPdf(result.summary.totalPaid)}`);
+  drawText(`Fakticheskiy srok: ${result.summary.actualMonths} mes.`);
 
   return y;
 }
@@ -82,7 +100,7 @@ function drawTableHeader(params: {
 
   const size = 9;
   for (const c of columns) {
-    page.drawText(c.label, {
+    page.drawText(safeText(c.label), {
       x: c.x,
       y,
       size,
@@ -114,7 +132,6 @@ function drawTableRow(params: {
   const { margin, pageWidth, font } = ctx;
   let { y } = params;
 
-  // subtle zebra background
   if (params.isAlt) {
     page.drawRectangle({
       x: margin,
@@ -127,7 +144,7 @@ function drawTableRow(params: {
 
   const size = 9;
   values.forEach((v, i) => {
-    page.drawText(v, { x: columns[i].x, y, size, font, color: rgb(0.1, 0.1, 0.1) });
+    page.drawText(safeText(v), { x: columns[i].x, y, size, font, color: rgb(0.1, 0.1, 0.1) });
   });
   y -= 12;
   return y;
@@ -136,12 +153,12 @@ function drawTableRow(params: {
 function rowToValues(r: ScheduleRow) {
   return [
     String(r.month),
-    r.dateLabel ?? '—',
-    formatMoney(r.paymentTotal),
-    formatMoney(r.interest),
-    formatMoney(r.principal),
-    r.earlyPayment > 0 ? formatMoney(r.earlyPayment) : '—',
-    formatMoney(r.balanceAfter)
+    r.dateLabel ?? '-',
+    formatMoneyPdf(r.paymentTotal),
+    formatMoneyPdf(r.interest),
+    formatMoneyPdf(r.principal),
+    r.earlyPayment > 0 ? formatMoneyPdf(r.earlyPayment) : '-',
+    formatMoneyPdf(r.balanceAfter)
   ];
 }
 
@@ -165,13 +182,13 @@ export async function buildPdfReport(params: {
   };
 
   const columns = [
-    { label: 'Мес', x: ctx.margin },
-    { label: 'Дата', x: ctx.margin + 35 },
-    { label: 'Платёж', x: ctx.margin + 105 },
+    { label: 'Mes', x: ctx.margin },
+    { label: 'Data', x: ctx.margin + 35 },
+    { label: 'Plateg', x: ctx.margin + 105 },
     { label: '%', x: ctx.margin + 210 },
-    { label: 'Долг', x: ctx.margin + 285 },
-    { label: 'Досрочно', x: ctx.margin + 360 },
-    { label: 'Остаток', x: ctx.margin + 455 }
+    { label: 'Dolg', x: ctx.margin + 285 },
+    { label: 'Dosrochno', x: ctx.margin + 360 },
+    { label: 'Ostatok', x: ctx.margin + 455 }
   ];
 
   let page = addPage(ctx);
@@ -180,8 +197,7 @@ export async function buildPdfReport(params: {
   y = drawTitleBlock({ ctx, page, request, result, yStart: y });
   y -= 10;
 
-  // Table title
-  page.drawText('График платежей', {
+  page.drawText(safeText('Grafik platezhey'), {
     x: ctx.margin,
     y,
     size: 14,
@@ -196,8 +212,6 @@ export async function buildPdfReport(params: {
 
   for (let i = 0; i < result.schedule.length; i++) {
     const r = result.schedule[i];
-
-    // page break
     if (y < bottomLimit) {
       page = addPage(ctx);
       y = ctx.pageHeight - ctx.margin;

@@ -73,7 +73,7 @@ export default function ThemeToggle() {
       title={nextIsDark ? 'Переключить на тёмную тему' : 'Переключить на светлую тему'}
       aria-label={nextIsDark ? 'Переключить на тёмную тему' : 'Переключить на светлую тему'}
     >
-      {nextIsDark ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
+      {nextIsDark ? <MoonIcon className="h-6 w-6" /> : <SunIcon className="h-6 w-6" />}
     </button>
   );
 }

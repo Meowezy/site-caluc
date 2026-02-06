@@ -1,8 +1,8 @@
 import React from 'react';
 
 /**
- * Minimal banking-style logomark for "КредитПлан".
- * Circle + monogram "КП" + subtle growth line.
+ * Alternate logomark: rounded square + minimal "calculator" glyph.
+ * Works well in light/dark headers.
  */
 export default function LogoMark({ className }: { className?: string }) {
   return (
@@ -14,37 +14,33 @@ export default function LogoMark({ className }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <linearGradient id="kp_g" x1="10" y1="10" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+        <linearGradient id="cp_g" x1="8" y1="10" x2="40" y2="40" gradientUnits="userSpaceOnUse">
           <stop stopColor="#2563eb" />
-          <stop offset="1" stopColor="#1d4ed8" />
+          <stop offset="1" stopColor="#0b5bd3" />
         </linearGradient>
       </defs>
 
-      <circle cx="24" cy="24" r="20" fill="url(#kp_g)" />
-      <circle cx="24" cy="24" r="19" stroke="rgba(255,255,255,0.22)" />
+      <rect x="6" y="6" width="36" height="36" rx="12" fill="url(#cp_g)" />
+      <rect x="7" y="7" width="34" height="34" rx="11" stroke="rgba(255,255,255,0.22)" />
 
-      {/* Monogram */}
-      <path
-        d="M18 16v16M18 24h4.8l3.2-4.2"
-        stroke="white"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity="0.95"
-      />
-      <path
-        d="M27 32V16m0 8.5c1.2-1.5 2.6-2.3 4.4-2.3 2 0 3.6 1 3.6 3.7V32"
-        stroke="white"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity="0.95"
-      />
+      {/* screen */}
+      <rect x="15" y="14" width="18" height="9" rx="3" fill="rgba(255,255,255,0.92)" />
+      <path d="M18 19h12" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" />
 
-      {/* subtle growth line */}
+      {/* buttons grid */}
+      <g fill="rgba(255,255,255,0.92)">
+        <rect x="15" y="26" width="6" height="6" rx="2" />
+        <rect x="22" y="26" width="6" height="6" rx="2" />
+        <rect x="29" y="26" width="6" height="6" rx="2" />
+        <rect x="15" y="33" width="6" height="6" rx="2" />
+        <rect x="22" y="33" width="6" height="6" rx="2" />
+        <rect x="29" y="33" width="6" height="6" rx="2" />
+      </g>
+
+      {/* subtle check/graph */}
       <path
-        d="M14.5 31.5l6-6 4 4 8-9"
-        stroke="rgba(255,255,255,0.75)"
+        d="M16.2 31.4l2.2 2.2 4.6-5.1"
+        stroke="rgba(37,99,235,0.95)"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
