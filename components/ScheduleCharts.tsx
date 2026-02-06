@@ -60,7 +60,7 @@ export default function ScheduleCharts({ rows }: { rows: ScheduleRow[] }) {
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <div className="rounded-xl border border-slate-200 p-3">
+      <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-800">
         <div className="text-sm font-semibold">Остаток долга</div>
         <div className="mt-3 h-64">
           <Line
@@ -75,7 +75,7 @@ export default function ScheduleCharts({ rows }: { rows: ScheduleRow[] }) {
           />
         </div>
       </div>
-      <div className="rounded-xl border border-slate-200 p-3">
+      <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-800">
         <div className="text-sm font-semibold">Платежи</div>
         <div className="mt-3 h-64">
           <Bar
