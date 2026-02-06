@@ -4,11 +4,25 @@ export type EarlyPaymentMode = 'REDUCE_TERM' | 'REDUCE_PAYMENT';
 
 export type EarlyPaymentRepeat = 'ONCE' | 'MONTHLY' | 'QUARTERLY' | 'UNTIL_END';
 
+export type EarlyPaymentWhenType = 'MONTH_INDEX' | 'MONTH';
+
 export type EarlyPayment = {
   id: string;
   amount: number;
-  /** 1 = first payment month */
+
+  /**
+   * How user specifies the time of early payment.
+   * - MONTH_INDEX: monthIndex is used.
+   * - MONTH: monthISO (YYYY-MM) is used and converted to monthIndex on submit.
+   */
+  whenType?: EarlyPaymentWhenType;
+
+  /** 1 = first payment month (required for API; for UI can be computed from monthISO) */
   monthIndex: number;
+
+  /** Month in format YYYY-MM (used when whenType === 'MONTH') */
+  monthISO?: string;
+
   mode: EarlyPaymentMode;
   repeat: EarlyPaymentRepeat;
 };
