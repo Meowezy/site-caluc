@@ -16,11 +16,7 @@ function applyTheme(theme: Theme) {
 function SunIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
-      <path
-        d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
+      <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" stroke="currentColor" strokeWidth="2" />
       <path
         d="M12 2v2M12 20v2M4 12H2M22 12h-2M5.6 5.6 4.2 4.2M19.8 19.8l-1.4-1.4M18.4 5.6l1.4-1.4M4.2 19.8l1.4-1.4"
         stroke="currentColor"
@@ -53,27 +49,39 @@ export default function ThemeToggle() {
     applyTheme(saved);
   }, []);
 
-  function toggle() {
-    const next: Theme = theme === 'light' ? 'dark' : 'light';
-    setTheme(next);
-    localStorage.setItem(STORAGE_KEY, next);
-    applyTheme(next);
+  function set(t: Theme) {
+    setTheme(t);
+    localStorage.setItem(STORAGE_KEY, t);
+    applyTheme(t);
   }
 
-  const isDark = theme === 'dark';
+  const baseBtn =
+    'inline-flex h-10 w-10 items-center justify-center rounded-full transition ' +
+    'hover:bg-slate-100 dark:hover:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-bank-50 dark:focus:ring-bank-600/20';
 
-  // UX: show the icon of the target theme (what will happen on click)
-  const nextIsDark = !isDark;
+  const active = 'text-bank-600';
+  const inactive = 'text-slate-500 dark:text-slate-400';
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      className="btn-secondary inline-flex h-10 w-10 items-center justify-center p-0"
-      title={nextIsDark ? 'Переключить на тёмную тему' : 'Переключить на светлую тему'}
-      aria-label={nextIsDark ? 'Переключить на тёмную тему' : 'Переключить на светлую тему'}
-    >
-      {nextIsDark ? <MoonIcon className="h-6 w-6" /> : <SunIcon className="h-6 w-6" />}
-    </button>
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={() => set('light')}
+        className={`${baseBtn} ${theme === 'light' ? active : inactive}`}
+        title="Светлая тема"
+        aria-label="Светлая тема"
+      >
+        <SunIcon className="h-7 w-7" />
+      </button>
+      <button
+        type="button"
+        onClick={() => set('dark')}
+        className={`${baseBtn} ${theme === 'dark' ? active : inactive}`}
+        title="Тёмная тема"
+        aria-label="Тёмная тема"
+      >
+        <MoonIcon className="h-7 w-7" />
+      </button>
+    </div>
   );
 }

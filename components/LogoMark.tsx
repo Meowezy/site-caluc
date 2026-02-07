@@ -1,8 +1,8 @@
 import React from 'react';
 
 /**
- * Alternate logomark: rounded square + minimal "calculator" glyph.
- * Works well in light/dark headers.
+ * Banking-style shield logomark for "КредитПлан".
+ * Minimal, recognizable, works on light/dark.
  */
 export default function LogoMark({ className }: { className?: string }) {
   return (
@@ -14,37 +14,41 @@ export default function LogoMark({ className }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <linearGradient id="cp_g" x1="8" y1="10" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+        <linearGradient id="kp_sh" x1="10" y1="8" x2="38" y2="40" gradientUnits="userSpaceOnUse">
           <stop stopColor="#2563eb" />
-          <stop offset="1" stopColor="#0b5bd3" />
+          <stop offset="1" stopColor="#1d4ed8" />
         </linearGradient>
       </defs>
 
-      <rect x="6" y="6" width="36" height="36" rx="12" fill="url(#cp_g)" />
-      <rect x="7" y="7" width="34" height="34" rx="11" stroke="rgba(255,255,255,0.22)" />
-
-      {/* screen */}
-      <rect x="15" y="14" width="18" height="9" rx="3" fill="rgba(255,255,255,0.92)" />
-      <path d="M18 19h12" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" />
-
-      {/* buttons grid */}
-      <g fill="rgba(255,255,255,0.92)">
-        <rect x="15" y="26" width="6" height="6" rx="2" />
-        <rect x="22" y="26" width="6" height="6" rx="2" />
-        <rect x="29" y="26" width="6" height="6" rx="2" />
-        <rect x="15" y="33" width="6" height="6" rx="2" />
-        <rect x="22" y="33" width="6" height="6" rx="2" />
-        <rect x="29" y="33" width="6" height="6" rx="2" />
-      </g>
-
-      {/* subtle check/graph */}
+      {/* shield */}
       <path
-        d="M16.2 31.4l2.2 2.2 4.6-5.1"
-        stroke="rgba(37,99,235,0.95)"
-        strokeWidth="2"
+        d="M24 6c5.5 4 10.8 4 16 4v15.8c0 9-6.3 14.7-16 16.2C14.3 40.5 8 34.8 8 25.8V10c5.2 0 10.5 0 16-4Z"
+        fill="url(#kp_sh)"
+      />
+      <path
+        d="M24 8.6c4.8 3.2 9.4 3.2 13.8 3.2v14c0 7.6-5.5 12.4-13.8 13.7-8.3-1.3-13.8-6.1-13.8-13.7v-14c4.4 0 9 0 13.8-3.2Z"
+        stroke="rgba(255,255,255,0.22)"
+        strokeWidth="1.2"
+      />
+
+      {/* graph */}
+      <path
+        d="M16 28.5l5-5 3.2 3.2 7-8"
+        stroke="rgba(255,255,255,0.9)"
+        strokeWidth="2.4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+      <path
+        d="M16 32h16"
+        stroke="rgba(255,255,255,0.55)"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <circle cx="16" cy="28.5" r="1.4" fill="rgba(255,255,255,0.95)" />
+      <circle cx="21" cy="23.5" r="1.4" fill="rgba(255,255,255,0.95)" />
+      <circle cx="24.2" cy="26.7" r="1.4" fill="rgba(255,255,255,0.95)" />
+      <circle cx="31.2" cy="18.7" r="1.4" fill="rgba(255,255,255,0.95)" />
     </svg>
   );
 }
