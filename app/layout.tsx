@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import ThemeToggle from '@/components/ThemeToggle';
-import LogoMark from '@/components/LogoMark';
+import SiteHeader from '@/components/SiteHeader';
 
 export const metadata: Metadata = {
   title: 'Калькулятор кредита и ипотеки',
@@ -48,25 +47,7 @@ export default function RootLayout({
       </head>
       <body>
         <div className="min-h-screen">
-          <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
-            <div className="container-page py-5">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <LogoMark className="h-10 w-10 shrink-0" />
-                  <div className="leading-tight">
-                    <div className="text-lg font-semibold">КредитПлан</div>
-                    <div className="text-sm text-slate-500 dark:text-slate-400">
-                      Калькулятор кредита и ипотеки.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <ThemeToggle />
-                </div>
-              </div>
-            </div>
-          </header>
+          <SiteHeader />
 
           <main className="container-page py-8">{children}</main>
 

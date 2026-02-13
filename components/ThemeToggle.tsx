@@ -56,14 +56,23 @@ export default function ThemeToggle() {
   }
 
   const baseBtn =
-    'inline-flex h-10 w-10 items-center justify-center rounded-full transition ' +
-    'hover:bg-slate-100 dark:hover:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-bank-50 dark:focus:ring-bank-600/20';
+    'relative inline-flex h-9 w-9 items-center justify-center rounded-full transition ' +
+    'focus:outline-none focus-visible:ring-4 focus-visible:ring-bank-50 dark:focus-visible:ring-bank-600/20';
 
-  const active = 'text-bank-600';
-  const inactive = 'text-slate-500 dark:text-slate-400';
+  const active =
+    'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200 dark:bg-slate-950 dark:text-slate-50 dark:ring-slate-800';
+  const inactive =
+    'text-slate-500 hover:text-slate-700 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60';
 
   return (
-    <div className="flex items-center gap-1">
+    <div
+      className={
+        'inline-flex items-center gap-1 rounded-full bg-slate-100 p-1 ring-1 ring-slate-200 ' +
+        'dark:bg-slate-900/60 dark:ring-slate-800'
+      }
+      role="group"
+      aria-label="Переключатель темы"
+    >
       <button
         type="button"
         onClick={() => set('light')}
@@ -71,7 +80,7 @@ export default function ThemeToggle() {
         title="Светлая тема"
         aria-label="Светлая тема"
       >
-        <SunIcon className="h-7 w-7" />
+        <SunIcon className="block h-5 w-5" />
       </button>
       <button
         type="button"
@@ -80,7 +89,7 @@ export default function ThemeToggle() {
         title="Тёмная тема"
         aria-label="Тёмная тема"
       >
-        <MoonIcon className="h-7 w-7" />
+        <MoonIcon className="block h-5 w-5" />
       </button>
     </div>
   );

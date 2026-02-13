@@ -14,6 +14,9 @@ body {
   @apply bg-slate-50 text-slate-900;
   @apply dark:bg-night-bg dark:text-slate-100;
 
+  /* Financial UIs benefit from aligned digits */
+  font-variant-numeric: tabular-nums;
+
   /* Subtle grid background (non-distracting) */
   background-image:
     linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
@@ -32,8 +35,9 @@ html.dark body {
 }
 
 .card {
-  @apply rounded-2xl bg-white shadow-card ring-1 ring-slate-200;
-  @apply dark:bg-night-surface dark:ring-slate-800;
+  @apply rounded-2xl bg-white/90 ring-1 ring-slate-200/80 shadow-card;
+  @apply dark:bg-night-surface/85 dark:ring-slate-800/80;
+  @apply backdrop-blur-sm;
 }
 
 .label {
@@ -47,28 +51,40 @@ html.dark body {
 }
 
 .input {
-  @apply mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition;
+  @apply mt-1 w-full rounded-xl border border-slate-200/90 bg-white/90 px-3 py-2 text-sm outline-none transition;
+  @apply placeholder:text-slate-400;
   @apply focus:border-bank-600 focus:ring-4 focus:ring-bank-50;
-  @apply dark:border-slate-700 dark:bg-night-surface2 dark:text-slate-100;
+  @apply dark:border-slate-800 dark:bg-night-surface2/80 dark:text-slate-100;
+  @apply dark:placeholder:text-slate-500;
   @apply dark:focus:border-bank-600 dark:focus:ring-bank-600/20;
 }
 
 .select {
-  @apply mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition;
+  @apply mt-1 w-full rounded-xl border border-slate-200/90 bg-white/90 px-3 py-2 text-sm outline-none transition;
   @apply focus:border-bank-600 focus:ring-4 focus:ring-bank-50;
-  @apply dark:border-slate-700 dark:bg-night-surface2 dark:text-slate-100;
+  @apply dark:border-slate-800 dark:bg-night-surface2/80 dark:text-slate-100;
   @apply dark:focus:border-bank-600 dark:focus:ring-bank-600/20;
 }
 
 .btn {
-  @apply inline-flex items-center justify-center rounded-xl bg-bank-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition;
-  @apply hover:bg-bank-700 disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex items-center justify-center rounded-xl bg-bank-600 px-4 py-2 text-sm font-semibold text-white transition;
+  @apply shadow-sm shadow-bank-600/15;
+  @apply hover:bg-bank-700 hover:shadow-md hover:shadow-bank-600/15;
+  @apply active:translate-y-[1px];
+  @apply focus:outline-none focus-visible:ring-4 focus-visible:ring-bank-50;
+  @apply dark:focus-visible:ring-bank-600/20;
+  @apply disabled:cursor-not-allowed disabled:opacity-60;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 ring-1 ring-slate-300 transition;
-  @apply hover:bg-slate-50;
-  @apply dark:bg-night-surface2 dark:text-slate-100 dark:ring-slate-700 dark:hover:bg-slate-900;
+  @apply inline-flex items-center justify-center rounded-xl bg-white/80 px-4 py-2 text-sm font-semibold text-slate-900 transition;
+  @apply ring-1 ring-slate-200/90;
+  @apply hover:bg-white hover:shadow-sm hover:shadow-slate-900/5;
+  @apply active:translate-y-[1px];
+  @apply focus:outline-none focus-visible:ring-4 focus-visible:ring-bank-50;
+  @apply dark:bg-night-surface2/70 dark:text-slate-100 dark:ring-slate-800;
+  @apply dark:hover:bg-night-surface2 dark:hover:shadow-black/20;
+  @apply dark:focus-visible:ring-bank-600/20;
 }
 
 .error {
