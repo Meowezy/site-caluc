@@ -46,14 +46,14 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <div className="min-h-screen">
+        <div className="min-h-screen flex flex-col">
           <SiteHeader />
 
-          <main className="container-page py-8">{children}</main>
+          <main className="container-page py-8 flex-1">{children}</main>
 
           <ScrollToTopButton />
 
-          <footer className="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+          <footer className="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 mt-auto">
             <div className="container-page py-6">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 dark:text-slate-400">
                 <div>© {new Date().getFullYear()} • КредитПлан</div>

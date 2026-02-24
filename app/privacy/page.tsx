@@ -8,6 +8,13 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <div className="space-y-6">
+      <a
+        href="/"
+        className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-bank-600 dark:hover:text-bank-500 transition-colors mb-4"
+      >
+        ← На главную
+      </a>
+      
       <section className="card p-6 md:p-10">
         <h1 className="text-2xl font-bold mb-6">Политика конфиденциальности</h1>
 
