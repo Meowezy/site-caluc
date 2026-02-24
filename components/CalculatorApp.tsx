@@ -39,6 +39,45 @@ function formatMoney(v: number) {
   }).format(v);
 }
 
+function parseMoneyInput(input: string): number | null {
+  const raw = (input ?? '').trim();
+  if (!raw) return null;
+
+  // Remove currency symbols/letters and whitespace, including NBSP/narrow NBSP.
+  // Keep digits and decimal separators.
+  let s = raw
+    .replace(/[\u00A0\u202F\s]/g, '')
+    .replace(/[₽рРубRUB]/g, '')
+    .replace(/[^0-9.,-]/g, '');
+
+  if (!/[0-9]/.test(s)) return null;
+
+  // If there are multiple separators, treat the last one as decimal separator and
+  // remove the rest as thousands separators.
+  const lastComma = s.lastIndexOf(',');
+  const lastDot = s.lastIndexOf('.');
+  const lastSep = Math.max(lastComma, lastDot);
+
+  if (lastSep !== -1) {
+    const intPart = s.slice(0, lastSep).replace(/[.,]/g, '');
+    const fracPart = s.slice(lastSep + 1).replace(/[.,]/g, '');
+    s = intPart + '.' + fracPart;
+  } else {
+    s = s.replace(/[.,]/g, '');
+  }
+
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
+}
+
+function parseIntInput(input: string): number | null {
+  const s = (input ?? '').replace(/[\u00A0\u202F\s]/g, '').replace(/[^0-9-]/g, '');
+  if (!s || !/[0-9]/.test(s)) return null;
+  const n = Number(s);
+  if (!Number.isFinite(n)) return null;
+  return Math.trunc(n);
+}
+
 function parseRate(input: string): number | null {
   const s = input.trim().replace(',', '.');
   if (!s) return null;
@@ -152,12 +191,18 @@ export default function CalculatorApp() {
       return;
     }
 
+    const normalizedEarlyPayments = normalizeEarlyPaymentsForApi(earlyPayments).map((ep) => ({
+      ...ep,
+      amount: Number.isFinite(ep.amount) ? ep.amount : 0,
+      monthIndex: Number.isFinite(ep.monthIndex) ? ep.monthIndex : 1
+    }));
+
     const req: CalcRequest = {
-      principal,
+      principal: Number.isFinite(principal) ? principal : 0,
       annualRate,
-      termMonths,
+      termMonths: Number.isFinite(termMonths) ? termMonths : 0,
       paymentType,
-      earlyPayments: normalizeEarlyPaymentsForApi(earlyPayments),
+      earlyPayments: normalizedEarlyPayments,
       startDate
     };
 
@@ -227,7 +272,10 @@ export default function CalculatorApp() {
                 className="input"
                 inputMode="numeric"
                 value={principal}
-                onChange={(e) => setPrincipal(Number(e.target.value))}
+                onChange={(e) => {
+                  const parsed = parseMoneyInput(e.target.value);
+                  setPrincipal(parsed ?? 0);
+                }}
               />
             </div>
 
@@ -240,7 +288,10 @@ export default function CalculatorApp() {
                     className="input"
                     inputMode="numeric"
                     value={termYears}
-                    onChange={(e) => setTermYears(Number(e.target.value))}
+                    onChange={(e) => {
+                      const parsed = parseIntInput(e.target.value);
+                      setTermYears(parsed ?? 0);
+                    }}
                     aria-label="Срок (лет)"
                     placeholder="Лет"
                   />
@@ -250,7 +301,10 @@ export default function CalculatorApp() {
                     className="input"
                     inputMode="numeric"
                     value={termMonthsExtra}
-                    onChange={(e) => setTermMonthsExtra(Number(e.target.value))}
+                    onChange={(e) => {
+                      const parsed = parseIntInput(e.target.value);
+                      setTermMonthsExtra(parsed ?? 0);
+                    }}
                     aria-label="Срок (мес.)"
                     placeholder="Месяцев"
                   />
@@ -376,9 +430,10 @@ export default function CalculatorApp() {
                           className="input"
                           inputMode="numeric"
                           value={ep.monthIndex}
-                          onChange={(e) =>
-                            updateEarlyPayment(ep.id, { monthIndex: Number(e.target.value) })
-                          }
+                          onChange={(e) => {
+                            const parsed = parseIntInput(e.target.value);
+                            updateEarlyPayment(ep.id, { monthIndex: Math.max(1, parsed ?? 1) });
+                          }}
                         />
                       )}
                     </div>
@@ -389,7 +444,10 @@ export default function CalculatorApp() {
                       className="input"
                       inputMode="numeric"
                       value={ep.amount}
-                      onChange={(e) => updateEarlyPayment(ep.id, { amount: Number(e.target.value) })}
+                      onChange={(e) => {
+                        const parsed = parseMoneyInput(e.target.value);
+                        updateEarlyPayment(ep.id, { amount: parsed ?? 0 });
+                      }}
                     />
                   </div>
                   <div>
@@ -454,11 +512,15 @@ export default function CalculatorApp() {
 
               <ExportPanel
                 calcRequest={{
-                  principal,
+                  principal: Number.isFinite(principal) ? principal : 0,
                   annualRate: parseRate(annualRateInput) ?? 0,
-                  termMonths,
+                  termMonths: Number.isFinite(termMonths) ? termMonths : 0,
                   paymentType,
-                  earlyPayments: normalizeEarlyPaymentsForApi(earlyPayments),
+                  earlyPayments: normalizeEarlyPaymentsForApi(earlyPayments).map((ep) => ({
+                    ...ep,
+                    amount: Number.isFinite(ep.amount) ? ep.amount : 0,
+                    monthIndex: Number.isFinite(ep.monthIndex) ? ep.monthIndex : 1
+                  })),
                   startDate
                 }}
               />
