@@ -130,7 +130,7 @@ export async function POST(request: Request) {
     const result = calculateSchedule(calcRequest);
     const pdfBytes = await buildPdfReport({ request: calcRequest, result });
 
-    const subject = 'Отчёт: калькулятор кредита и ипотеки';
+    const subject = 'Отчёт: калькулятор кредита';
     const text = 'Во вложении PDF-отчёт с графиком платежей.';
 
     // Prefer SendGrid; fallback to SMTP.

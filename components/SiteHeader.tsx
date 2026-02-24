@@ -31,12 +31,24 @@ export default function SiteHeader() {
             <div className="leading-tight">
               <div className="text-lg font-semibold tracking-tight">КредитПлан</div>
               <div className="text-sm text-slate-500 dark:text-slate-400">
-                Калькулятор кредита и ипотеки.
+                Калькулятор кредита.
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            <a
+              href="/articles"
+              className="hidden sm:inline-flex items-center px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-bank-600 dark:hover:text-bank-500 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
+            >
+              Статьи
+            </a>
+            <a
+              href="/about"
+              className="hidden sm:inline-flex items-center px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-bank-600 dark:hover:text-bank-500 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
+            >
+              О сервисе
+            </a>
             <ThemeToggle />
           </div>
         </div>

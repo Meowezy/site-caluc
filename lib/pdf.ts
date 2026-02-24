@@ -128,6 +128,16 @@ function drawTitleBlock(params: {
   drawText(`Досрочные: ${formatMoneyPdf(result.summary.totalEarlyPayments)}`);
   drawText(`Всего выплачено: ${formatMoneyPdf(result.summary.totalPaid)}`);
   drawText(`Фактический срок: ${result.summary.actualMonths} мес.`);
+  
+  // Add last payment date
+  if (result.schedule.length > 0 && result.schedule[result.schedule.length - 1].dateLabel) {
+    const lastDate = new Date(result.schedule[result.schedule.length - 1].dateLabel + 'T00:00:00');
+    const formattedDate = lastDate.toLocaleDateString('ru-RU', {
+      year: 'numeric',
+      month: 'long'
+    });
+    drawText(`Последний платёж: ${formattedDate}`);
+  }
 
   return y;
 }

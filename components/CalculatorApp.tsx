@@ -493,7 +493,7 @@ export default function CalculatorApp() {
 
           {result ? (
             <div className="mt-4 space-y-5">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400">Переплата по процентам</div>
                   <div className="mt-2 text-xl font-semibold">
@@ -507,6 +507,18 @@ export default function CalculatorApp() {
                 <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400">Фактический срок</div>
                   <div className="mt-2 text-xl font-semibold">{formatTerm(result.summary.actualMonths)}</div>
+                </div>
+                <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
+                  <div className="text-xs text-slate-500 dark:text-slate-400">Последний платёж</div>
+                  <div className="mt-2 text-xl font-semibold">
+                    {result.schedule.length > 0 && result.schedule[result.schedule.length - 1].dateLabel
+                      ? new Date(result.schedule[result.schedule.length - 1].dateLabel + 'T00:00:00')
+                          .toLocaleDateString('ru-RU', {
+                            year: 'numeric',
+                            month: 'long'
+                          })
+                      : '—'}
+                  </div>
                 </div>
               </div>
 

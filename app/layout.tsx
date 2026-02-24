@@ -4,18 +4,17 @@ import SiteHeader from '@/components/SiteHeader';
 import ScrollToTopButton from '@/components/ScrollToTopButton';
 
 export const metadata: Metadata = {
-  title: 'Калькулятор кредита и ипотеки',
+  title: 'Калькулятор кредита',
   description:
-    'Современный калькулятор кредита и ипотеки: аннуитетные и дифференцированные платежи, досрочные погашения, график и экспорт в PDF.',
+    'Современный калькулятор кредита: аннуитетные и дифференцированные платежи, досрочные погашения, график и экспорт в PDF.',
   keywords: [
     'калькулятор кредита',
-    'калькулятор ипотеки',
     'аннуитет',
     'дифференцированный платеж',
     'досрочное погашение'
   ],
   openGraph: {
-    title: 'Калькулятор кредита и ипотеки',
+    title: 'Калькулятор кредита',
     description:
       'Рассчитайте график платежей с учётом досрочных погашений и скачайте отчёт.',
     type: 'website'
@@ -55,8 +54,16 @@ export default function RootLayout({
           <ScrollToTopButton />
 
           <footer className="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
-            <div className="container-page py-6 text-sm text-slate-500 dark:text-slate-400">
-              © {new Date().getFullYear()} • КредитПлан
+            <div className="container-page py-6">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 dark:text-slate-400">
+                <div>© {new Date().getFullYear()} • КредитПлан</div>
+                <a
+                  href="/privacy"
+                  className="hover:text-bank-600 dark:hover:text-bank-500 transition-colors underline-offset-4 hover:underline"
+                >
+                  Политика конфиденциальности
+                </a>
+              </div>
             </div>
           </footer>
         </div>
