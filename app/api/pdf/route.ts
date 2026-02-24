@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       status: 200,
       headers: {
         'content-type': 'application/pdf',
-        'content-disposition': 'attachment; filename="credit-report.pdf"'
+        'content-disposition': 'attachment; filename="kreditplan-otchet.pdf"'
       }
     });
   } catch (e: any) {

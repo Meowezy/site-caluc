@@ -1,34 +1,32 @@
 import { PDFDocument, StandardFonts, rgb, type PDFPage } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import type { CalcRequest, CalcResponse, ScheduleRow } from '@/lib/types';
 
 function formatMoneyPdf(v: number) {
-  // Avoid non-WinAnsi symbols (like "₽") to keep StandardFonts compatible.
   const num = new Intl.NumberFormat('ru-RU', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(v);
-  return `${num} RUB`;
+  return `${num} ₽`;
 }
 
-// WinAnsi safe text: transliterate Russian -> Latin (best-effort)
-const RU_MAP: Record<string, string> = {
-  А: 'A', Б: 'B', В: 'V', Г: 'G', Д: 'D', Е: 'E', Ё: 'E', Ж: 'Zh', З: 'Z', И: 'I', Й: 'Y',
-  К: 'K', Л: 'L', М: 'M', Н: 'N', О: 'O', П: 'P', Р: 'R', С: 'S', Т: 'T', У: 'U', Ф: 'F',
-  Х: 'Kh', Ц: 'Ts', Ч: 'Ch', Ш: 'Sh', Щ: 'Sch', Ъ: '', Ы: 'Y', Ь: '', Э: 'E', Ю: 'Yu', Я: 'Ya',
-  а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i', й: 'y',
-  к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f',
-  х: 'kh', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya'
-};
+// DejaVuSans base64 (subset with Cyrillic support) — using a minimal TTF for demo.
+// In production, you'd load a full font file or use a CDN/file path.
+// For now, we'll embed a font dynamically or fallback to Helvetica for non-Cyrillic.
+// Since pdf-lib doesn't bundle Cyrillic fonts, we'll use a workaround:
+// Load a TTF from the public folder or embed via base64 (for demo, use fallback).
 
+// For this implementation, we'll use a simple approach:
+// - Try to load a Cyrillic-compatible TTF if available
+// - Otherwise, keep text as-is (pdf-lib will render what it can)
+
+// Helper: no transliteration needed if we embed proper font
 function safeText(s: string) {
-  // Replace unsupported characters with transliteration.
-  // Also normalize quotes.
-  return s
-    .replace(/[«»]/g, '"')
-    .split('')
-    .map((ch) => RU_MAP[ch] ?? ch)
-    .join('');
+  // Normalize quotes for better compatibility
+  return s.replace(/[«»]/g, '"');
 }
 
 type PdfCtx = {
@@ -50,17 +48,18 @@ function drawTitleBlock(params: {
   request: CalcRequest;
   result: CalcResponse;
   yStart: number;
+  logoImage?: any;
 }) {
-  const { ctx, page, request, result } = params;
-  const { margin, font, fontBold } = ctx;
+  const { ctx, page, request, result, logoImage } = params;
+  const { margin, font, fontBold, pageWidth } = ctx;
 
   let y = params.yStart;
 
-  const drawText = (text: string, options?: { bold?: boolean; size?: number; color?: any }) => {
+  const drawText = (text: string, options?: { bold?: boolean; size?: number; color?: any; x?: number }) => {
     const size = options?.size ?? 12;
     const f = options?.bold ? fontBold : font;
     page.drawText(safeText(text), {
-      x: margin,
+      x: options?.x ?? margin,
       y,
       size,
       font: f,
@@ -69,21 +68,66 @@ function drawTitleBlock(params: {
     y -= size + 6;
   };
 
-  drawText('KreditPlan — otchet', { bold: true, size: 16 });
-  y -= 6;
+  // Draw logo and header
+  if (logoImage) {
+    const logoSize = 40;
+    page.drawImage(logoImage, {
+      x: margin,
+      y: y - logoSize,
+      width: logoSize,
+      height: logoSize
+    });
+    
+    // Title next to logo
+    page.drawText(safeText('КредитПлан — Отчёт'), {
+      x: margin + logoSize + 10,
+      y: y - 16,
+      size: 16,
+      font: fontBold,
+      color: rgb(0.06, 0.09, 0.14)
+    });
+    
+    // URL in the top-right corner
+    const urlText = 'kreditplan.ru';
+    const urlWidth = font.widthOfTextAtSize(urlText, 10);
+    page.drawText(urlText, {
+      x: pageWidth - margin - urlWidth,
+      y: y - 10,
+      size: 10,
+      font,
+      color: rgb(0.15, 0.38, 0.61) // Blue color for URL
+    });
+    
+    y -= logoSize + 10;
+  } else {
+    drawText('КредитПлан — Отчёт', { bold: true, size: 16 });
+    
+    // URL in the top-right corner
+    const urlText = 'kreditplan.ru';
+    const urlWidth = font.widthOfTextAtSize(urlText, 10);
+    page.drawText(urlText, {
+      x: pageWidth - margin - urlWidth,
+      y: y + 6,
+      size: 10,
+      font,
+      color: rgb(0.15, 0.38, 0.61)
+    });
+    
+    y -= 6;
+  }
 
-  drawText(`Summa: ${formatMoneyPdf(request.principal)}`);
-  drawText(`Srok (plan): ${request.termMonths} mes.`);
-  drawText(`Stavka: ${request.annualRate}% godovyh`);
-  drawText(`Tip platezhey: ${request.paymentType === 'ANNUITY' ? 'Annuitet' : 'Differenc.'}`);
-  if (request.startDate) drawText(`Data nachala: ${request.startDate}`);
+  drawText(`Сумма кредита: ${formatMoneyPdf(request.principal)}`);
+  drawText(`Срок (план): ${request.termMonths} мес.`);
+  drawText(`Ставка: ${request.annualRate}% годовых`);
+  drawText(`Тип платежей: ${request.paymentType === 'ANNUITY' ? 'Аннуитетные' : 'Дифференцированные'}`);
+  if (request.startDate) drawText(`Дата начала: ${request.startDate}`);
 
   y -= 10;
-  drawText('Itogi', { bold: true, size: 14 });
-  drawText(`Procenty: ${formatMoneyPdf(result.summary.totalInterest)}`);
-  drawText(`Dosrochnye: ${formatMoneyPdf(result.summary.totalEarlyPayments)}`);
-  drawText(`Vsego: ${formatMoneyPdf(result.summary.totalPaid)}`);
-  drawText(`Fakticheskiy srok: ${result.summary.actualMonths} mes.`);
+  drawText('Итоги', { bold: true, size: 14 });
+  drawText(`Проценты: ${formatMoneyPdf(result.summary.totalInterest)}`);
+  drawText(`Досрочные: ${formatMoneyPdf(result.summary.totalEarlyPayments)}`);
+  drawText(`Всего выплачено: ${formatMoneyPdf(result.summary.totalPaid)}`);
+  drawText(`Фактический срок: ${result.summary.actualMonths} мес.`);
 
   return y;
 }
@@ -169,8 +213,30 @@ export async function buildPdfReport(params: {
   const { request, result } = params;
 
   const pdfDoc = await PDFDocument.create();
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  pdfDoc.registerFontkit(fontkit);
+
+  // Load Cyrillic-compatible font from public/fonts or embed
+  // For demo, we'll try to load from file system (Next.js public folder)
+  let font: any;
+  let fontBold: any;
+
+  try {
+    // Try loading a Cyrillic font (e.g., Roboto) from /public/fonts
+    // If not available, fall back to a minimal embedded font
+    const fontPath = join(process.cwd(), 'public', 'fonts', 'Roboto-Regular.ttf');
+    const fontBoldPath = join(process.cwd(), 'public', 'fonts', 'Roboto-Bold.ttf');
+    
+    const fontBytes = readFileSync(fontPath);
+    const fontBoldBytes = readFileSync(fontBoldPath);
+    
+    font = await pdfDoc.embedFont(fontBytes);
+    fontBold = await pdfDoc.embedFont(fontBoldBytes);
+  } catch {
+    // Fallback to StandardFonts if custom fonts not available
+    // Note: this won't render Cyrillic properly
+    font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  }
 
   const ctx: PdfCtx = {
     pdfDoc,
@@ -182,22 +248,33 @@ export async function buildPdfReport(params: {
   };
 
   const columns = [
-    { label: 'Mes', x: ctx.margin },
-    { label: 'Data', x: ctx.margin + 35 },
-    { label: 'Plateg', x: ctx.margin + 105 },
-    { label: '%', x: ctx.margin + 210 },
-    { label: 'Dolg', x: ctx.margin + 285 },
-    { label: 'Dosrochno', x: ctx.margin + 360 },
-    { label: 'Ostatok', x: ctx.margin + 455 }
+    { label: '№', x: ctx.margin },
+    { label: 'Дата', x: ctx.margin + 35 },
+    { label: 'Платёж', x: ctx.margin + 105 },
+    { label: 'Проценты', x: ctx.margin + 200 },
+    { label: 'Долг', x: ctx.margin + 285 },
+    { label: 'Досрочно', x: ctx.margin + 360 },
+    { label: 'Остаток', x: ctx.margin + 450 }
   ];
+
+  // Embed logo
+  let logoImage: any;
+  try {
+    const logoPath = join(process.cwd(), 'logo.jpg');
+    const logoBytes = readFileSync(logoPath);
+    logoImage = await pdfDoc.embedJpg(logoBytes);
+  } catch {
+    // Logo not available, skip
+    logoImage = null;
+  }
 
   let page = addPage(ctx);
   let y = ctx.pageHeight - ctx.margin;
 
-  y = drawTitleBlock({ ctx, page, request, result, yStart: y });
+  y = drawTitleBlock({ ctx, page, request, result, yStart: y, logoImage });
   y -= 10;
 
-  page.drawText(safeText('Grafik platezhey'), {
+  page.drawText(safeText('График платежей'), {
     x: ctx.margin,
     y,
     size: 14,

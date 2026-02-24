@@ -35,7 +35,7 @@ export default function ExportPanel({ calcRequest }: { calcRequest: CalcRequest 
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'credit-report.pdf';
+      a.download = 'kreditplan-otchet.pdf';
       document.body.appendChild(a);
       a.click();
       a.remove();
