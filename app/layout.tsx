@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import SiteHeader from '@/components/SiteHeader';
+import ScrollToTopButton from '@/components/ScrollToTopButton';
 
 export const metadata: Metadata = {
   title: 'Калькулятор кредита и ипотеки',
@@ -50,6 +51,8 @@ export default function RootLayout({
           <SiteHeader />
 
           <main className="container-page py-8">{children}</main>
+
+          <ScrollToTopButton />
 
           <footer className="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
             <div className="container-page py-6 text-sm text-slate-500 dark:text-slate-400">
