@@ -19,7 +19,7 @@ export async function buildExcelReport(params: {
     const logoPath = join(process.cwd(), 'logo.png');
     const logoBuffer = readFileSync(logoPath);
     logoId = workbook.addImage({
-      buffer: logoBuffer,
+      buffer: logoBuffer as any,
       extension: 'png'
     });
   } catch {
