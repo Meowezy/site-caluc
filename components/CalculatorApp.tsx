@@ -402,63 +402,74 @@ export default function CalculatorApp() {
             ) : null}
 
             {earlyPayments.map((ep) => (
-              <div key={ep.id} className="rounded-xl border border-slate-200 p-3 dark:border-slate-800">
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-                  <div>
-                    <div className="label">Когда</div>
-                    <div className="mt-1 grid grid-cols-2 gap-2">
-                      <CustomSelect
-                        value={ep.whenType ?? 'MONTH_INDEX'}
-                        onChange={(val) => updateEarlyPayment(ep.id, { whenType: val as any })}
-                        options={[
-                          { value: 'MONTH_INDEX', label: 'Месяц №' },
-                          { value: 'MONTH', label: 'Месяц (дата)' }
-                        ]}
-                      />
+              <div key={ep.id} className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <div className="label">Когда</div>
+                      <div className="mt-1">
+                        <CustomSelect
+                          value={ep.whenType ?? 'MONTH_INDEX'}
+                          onChange={(val) => updateEarlyPayment(ep.id, { whenType: val as any })}
+                          options={[
+                            { value: 'MONTH_INDEX', label: 'Месяц №' },
+                            { value: 'MONTH', label: 'Месяц (дата)' }
+                          ]}
+                        />
+                      </div>
+                    </div>
 
-                      {(ep.whenType ?? 'MONTH_INDEX') === 'MONTH' ? (
-                        <input
-                          className="input month-input"
-                          type="month"
-                          value={ep.monthISO ?? startDate.slice(0, 7)}
-                          onChange={(e) => updateEarlyPayment(ep.id, { monthISO: e.target.value })}
-                        />
-                      ) : (
-                        <input
-                          className="input"
-                          inputMode="numeric"
-                          value={ep.monthIndex}
-                          onChange={(e) => {
-                            const parsed = parseIntInput(e.target.value);
-                            updateEarlyPayment(ep.id, { monthIndex: Math.max(1, parsed ?? 1) });
-                          }}
-                        />
-                      )}
+                    <div>
+                      <div className="label">{(ep.whenType ?? 'MONTH_INDEX') === 'MONTH' ? 'Дата' : 'Номер месяца'}</div>
+                      <div className="mt-1">
+                        {(ep.whenType ?? 'MONTH_INDEX') === 'MONTH' ? (
+                          <input
+                            className="input month-input"
+                            type="month"
+                            value={ep.monthISO ?? startDate.slice(0, 7)}
+                            onChange={(e) => updateEarlyPayment(ep.id, { monthISO: e.target.value })}
+                          />
+                        ) : (
+                          <input
+                            className="input"
+                            inputMode="numeric"
+                            value={ep.monthIndex}
+                            onChange={(e) => {
+                              const parsed = parseIntInput(e.target.value);
+                              updateEarlyPayment(ep.id, { monthIndex: Math.max(1, parsed ?? 1) });
+                            }}
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <div className="label">Сумма</div>
-                    <input
-                      className="input"
-                      inputMode="numeric"
-                      value={ep.amount}
-                      onChange={(e) => {
-                        const parsed = parseMoneyInput(e.target.value);
-                        updateEarlyPayment(ep.id, { amount: parsed ?? 0 });
-                      }}
-                    />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <div className="label">Сумма</div>
+                      <input
+                        className="input"
+                        inputMode="numeric"
+                        value={ep.amount}
+                        onChange={(e) => {
+                          const parsed = parseMoneyInput(e.target.value);
+                          updateEarlyPayment(ep.id, { amount: parsed ?? 0 });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <div className="label">Эффект</div>
+                      <CustomSelect
+                        value={ep.mode}
+                        onChange={(val) => updateEarlyPayment(ep.id, { mode: val as any })}
+                        options={[
+                          { value: 'REDUCE_TERM', label: 'Уменьшить срок' },
+                          { value: 'REDUCE_PAYMENT', label: 'Уменьшить платёж' }
+                        ]}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <div className="label">Эффект</div>
-                    <CustomSelect
-                      value={ep.mode}
-                      onChange={(val) => updateEarlyPayment(ep.id, { mode: val as any })}
-                      options={[
-                        { value: 'REDUCE_TERM', label: 'Уменьшить срок' },
-                        { value: 'REDUCE_PAYMENT', label: 'Уменьшить платёж' }
-                      ]}
-                    />
-                  </div>
+
                   <div>
                     <div className="label">Повтор</div>
                     <CustomSelect
