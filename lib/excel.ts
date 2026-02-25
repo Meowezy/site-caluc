@@ -120,7 +120,7 @@ export async function buildExcelReport(params: {
       earlySheet.addRow({
         month: ep.monthIndex,
         amount: `${formatMoney(ep.amount)} ₽`,
-        type: ep.reduceType === 'TERM' ? 'Сокращение срока' : 'Сокращение платежа'
+        type: ep.mode === 'REDUCE_TERM' ? 'Сокращение срока' : 'Сокращение платежа'
       });
 
       if (idx % 2 === 0) {
