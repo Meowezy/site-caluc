@@ -317,7 +317,7 @@ export default function CalculatorApp() {
               <div className="label">Дата начала</div>
               <div className="hint">Нужна для отображения дат в графике и отчёте.</div>
               <input
-                className="input"
+                className="input date-input"
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
@@ -421,7 +421,7 @@ export default function CalculatorApp() {
 
                       {(ep.whenType ?? 'MONTH_INDEX') === 'MONTH' ? (
                         <input
-                          className="input"
+                          className="input month-input"
                           type="month"
                           value={ep.monthISO ?? startDate.slice(0, 7)}
                           onChange={(e) => updateEarlyPayment(ep.id, { monthISO: e.target.value })}
