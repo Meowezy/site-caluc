@@ -529,19 +529,16 @@ export default function CalculatorApp() {
                 {/* Переплата */}
                 <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Переплата по процентам</div>
-                  <div
-                    className="text-[15px] sm:text-base font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap overflow-hidden text-ellipsis"
-                    title={formatMoney(result.summary.totalInterest)}
-                  >
+                  <div className="text-lg sm:text-xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100">
+                    {formatMoney(result.summary.totalInterest)}
+                  </div>
+                  <div className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 tabular-nums">
                     {(() => {
                       const interest = result.summary.totalInterest;
                       const total = result.summary.totalPaid;
                       const share = total > 0 ? (interest / total) * 100 : 0;
-                      const shareLabel = Number.isFinite(share) && share > 0 ? `${share.toFixed(1)}%` : undefined;
-                      const parts = [formatMoney(interest), shareLabel ? `• ${shareLabel}` : undefined].filter(
-                        (p): p is string => Boolean(p)
-                      );
-                      return parts.join(' ');
+                      if (!Number.isFinite(share) || share <= 0) return 'Доля процентов: —';
+                      return `Доля процентов: ${share.toFixed(1)}%`;
                     })()}
                   </div>
                 </div>
@@ -549,16 +546,13 @@ export default function CalculatorApp() {
                 {/* Всего */}
                 <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Всего к оплате</div>
-                  <div
-                    className="text-[15px] sm:text-base font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap overflow-hidden text-ellipsis"
-                    title={formatMoney(result.summary.totalPaid)}
-                  >
+                  <div className="text-lg sm:text-xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100">
+                    {formatMoney(result.summary.totalPaid)}
+                  </div>
+                  <div className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 tabular-nums">
                     {(() => {
-                      const total = result.summary.totalPaid;
                       const interest = result.summary.totalInterest;
-                      const extraLabel = interest > 0 ? `• +${formatMoney(interest)}` : undefined;
-                      const parts = [formatMoney(total), extraLabel].filter((p): p is string => Boolean(p));
-                      return parts.join(' ');
+                      return interest > 0 ? `В т.ч. проценты: ${formatMoney(interest)}` : 'В т.ч. проценты: —';
                     })()}
                   </div>
                 </div>
@@ -566,17 +560,23 @@ export default function CalculatorApp() {
                 {/* Срок */}
                 <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Фактический срок</div>
-                  <div
-                    className="text-[15px] sm:text-base font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap overflow-hidden text-ellipsis"
-                    title={formatTerm(result.summary.actualMonths)}
-                  >
+                  <div className="text-lg sm:text-xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100">
+                    {(() => {
+                      const actual = result.summary.actualMonths;
+                      const years = Math.floor(actual / 12);
+                      const m = actual % 12;
+                      const yearsPart = years > 0 ? `${years} ${years === 1 ? 'год' : years < 5 ? 'года' : 'лет'}` : '';
+                      const monthsPart = m > 0 ? `${m} мес.` : '';
+                      return [yearsPart, monthsPart].filter(Boolean).join(' ') || `${actual} мес.`;
+                    })()}
+                  </div>
+                  <div className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 tabular-nums">
                     {(() => {
                       const actual = result.summary.actualMonths;
                       const planned = Number.isFinite(termMonths) ? termMonths : undefined;
                       const saved = planned && planned > 0 ? planned - actual : 0;
-                      const savedLabel = saved > 0 ? `• −${saved} мес.` : undefined;
-                      const parts = [formatTerm(actual), savedLabel].filter((p): p is string => Boolean(p));
-                      return parts.join(' ');
+                      const savedLabel = saved > 0 ? `Сокращение: ${saved} мес.` : 'Сокращение: —';
+                      return `${actual} мес. • ${savedLabel}`;
                     })()}
                   </div>
                 </div>
@@ -584,62 +584,31 @@ export default function CalculatorApp() {
                 {/* Последний платёж */}
                 <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Последний платёж</div>
-                  <div
-                    className="text-[15px] sm:text-base font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap overflow-hidden text-ellipsis"
-                    title={(() => {
-                      if (!result.schedule.length) return '—';
-                      const lastRow = result.schedule[result.schedule.length - 1];
-
-                      const lastAmount = Number.isFinite(lastRow.paymentTotal)
-                        ? formatMoney(lastRow.paymentTotal)
-                        : undefined;
-
-                      const monthLabel = (() => {
-                        if (!lastRow.dateLabel) return undefined;
-                        try {
-                          const match = lastRow.dateLabel.match(/^(\\d{2})\\.(\\d{4})$/);
-                          if (!match) return undefined;
-                          const [, month, year] = match;
-                          const date = new Date(`${year}-${month}-01T00:00:00`);
-                          if (isNaN(date.getTime())) return undefined;
-                          return date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long' });
-                        } catch {
-                          return undefined;
-                        }
-                      })();
-
-                      const parts = [monthLabel, lastAmount].filter((p): p is string => Boolean(p));
-                      return parts.length ? parts.join(' • ') : '—';
-                    })()}
-                  >
+                  <div className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
                     {(() => {
                       if (!result.schedule.length) return '—';
                       const lastRow = result.schedule[result.schedule.length - 1];
-
+                      if (!lastRow.dateLabel) return '—';
+                      try {
+                        const match = lastRow.dateLabel.match(/^(\d{2})\.(\d{4})$/);
+                        if (!match) return '—';
+                        const [, month, year] = match;
+                        const date = new Date(`${year}-${month}-01T00:00:00`);
+                        if (isNaN(date.getTime())) return '—';
+                        return date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long' });
+                      } catch {
+                        return '—';
+                      }
+                    })()}
+                  </div>
+                  <div className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 tabular-nums">
+                    {(() => {
+                      if (!result.schedule.length) return 'Сумма: —';
+                      const lastRow = result.schedule[result.schedule.length - 1];
                       const lastAmount = Number.isFinite(lastRow.paymentTotal)
                         ? formatMoney(lastRow.paymentTotal)
                         : undefined;
-
-                      const monthLabel = (() => {
-                        if (!lastRow.dateLabel) return undefined;
-                        try {
-                          // Format is "MM.yyyy" from calc.ts (e.g., "12.2043")
-                          const match = lastRow.dateLabel.match(/^(\\d{2})\\.(\\d{4})$/);
-                          if (!match) return undefined;
-
-                          const [, month, year] = match;
-                          const date = new Date(`${year}-${month}-01T00:00:00`);
-                          if (isNaN(date.getTime())) return undefined;
-
-                          return date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'short' }).replace('.', '');
-                        } catch {
-                          return undefined;
-                        }
-                      })();
-
-                      const parts = [monthLabel, lastAmount].filter((p): p is string => Boolean(p));
-                      const text = parts.length ? parts.join(' • ') : '—';
-                      return text;
+                      return lastAmount ? `Сумма: ${lastAmount}` : 'Сумма: —';
                     })()}
                   </div>
                 </div>
