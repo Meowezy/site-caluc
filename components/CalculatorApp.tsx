@@ -10,6 +10,7 @@ import ScheduleCharts from '@/components/ScheduleCharts';
 import ScheduleTable from '@/components/ScheduleTable';
 import ExportPanel from '@/components/ExportPanel';
 import FadeInOnScroll from '@/components/FadeInOnScroll';
+import CustomSelect from '@/components/CustomSelect';
 
 const STORAGE_KEY = 'ccalc:v1';
 
@@ -337,14 +338,14 @@ export default function CalculatorApp() {
 
             <div>
               <div className="label">Тип платежей</div>
-              <select
-                className="select"
+              <CustomSelect
                 value={paymentType}
-                onChange={(e) => setPaymentType(e.target.value as any)}
-              >
-                <option value="ANNUITY">Аннуитетный</option>
-                <option value="DIFFERENTIATED">Дифференцированный</option>
-              </select>
+                onChange={(val) => setPaymentType(val as any)}
+                options={[
+                  { value: 'ANNUITY', label: 'Аннуитетный' },
+                  { value: 'DIFFERENTIATED', label: 'Дифференцированный' }
+                ]}
+              />
             </div>
 
             <div className="flex flex-wrap gap-3">
@@ -406,18 +407,14 @@ export default function CalculatorApp() {
                   <div>
                     <div className="label">Когда</div>
                     <div className="mt-1 grid grid-cols-2 gap-2">
-                      <select
-                        className="select"
+                      <CustomSelect
                         value={ep.whenType ?? 'MONTH_INDEX'}
-                        onChange={(e) =>
-                          updateEarlyPayment(ep.id, {
-                            whenType: e.target.value as any
-                          })
-                        }
-                      >
-                        <option value="MONTH_INDEX">Месяц №</option>
-                        <option value="MONTH">Месяц (дата)</option>
-                      </select>
+                        onChange={(val) => updateEarlyPayment(ep.id, { whenType: val as any })}
+                        options={[
+                          { value: 'MONTH_INDEX', label: 'Месяц №' },
+                          { value: 'MONTH', label: 'Месяц (дата)' }
+                        ]}
+                      />
 
                       {(ep.whenType ?? 'MONTH_INDEX') === 'MONTH' ? (
                         <input
@@ -453,27 +450,27 @@ export default function CalculatorApp() {
                   </div>
                   <div>
                     <div className="label">Эффект</div>
-                    <select
-                      className="select"
+                    <CustomSelect
                       value={ep.mode}
-                      onChange={(e) => updateEarlyPayment(ep.id, { mode: e.target.value as any })}
-                    >
-                      <option value="REDUCE_TERM">Уменьшить срок</option>
-                      <option value="REDUCE_PAYMENT">Уменьшить платёж</option>
-                    </select>
+                      onChange={(val) => updateEarlyPayment(ep.id, { mode: val as any })}
+                      options={[
+                        { value: 'REDUCE_TERM', label: 'Уменьшить срок' },
+                        { value: 'REDUCE_PAYMENT', label: 'Уменьшить платёж' }
+                      ]}
+                    />
                   </div>
                   <div>
                     <div className="label">Повтор</div>
-                    <select
-                      className="select"
+                    <CustomSelect
                       value={ep.repeat}
-                      onChange={(e) => updateEarlyPayment(ep.id, { repeat: e.target.value as any })}
-                    >
-                      <option value="ONCE">Разовый</option>
-                      <option value="MONTHLY">Каждый месяц</option>
-                      <option value="QUARTERLY">Раз в квартал</option>
-                      <option value="UNTIL_END">Регулярно до погашения</option>
-                    </select>
+                      onChange={(val) => updateEarlyPayment(ep.id, { repeat: val as any })}
+                      options={[
+                        { value: 'ONCE', label: 'Разовый' },
+                        { value: 'MONTHLY', label: 'Каждый месяц' },
+                        { value: 'QUARTERLY', label: 'Раз в квартал' },
+                        { value: 'UNTIL_END', label: 'Регулярно до погашения' }
+                      ]}
+                    />
                   </div>
                 </div>
 
@@ -535,19 +532,29 @@ export default function CalculatorApp() {
                 <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Последний платёж</div>
                   <div className="text-lg font-semibold break-words">
-                    {result.schedule.length > 0 && result.schedule[result.schedule.length - 1].dateLabel
-                      ? (() => {
-                          try {
-                            const lastDate = result.schedule[result.schedule.length - 1].dateLabel;
-                            return new Date(lastDate + 'T00:00:00').toLocaleDateString('ru-RU', {
-                              year: 'numeric',
-                              month: 'long'
-                            });
-                          } catch {
-                            return '—';
-                          }
-                        })()
-                      : '—'}
+                    {(() => {
+                      if (!result.schedule.length) return '—';
+                      const lastRow = result.schedule[result.schedule.length - 1];
+                      if (!lastRow.dateLabel) return '—';
+                      
+                      try {
+                        // Format is "MM.yyyy" from calc.ts (e.g., "12.2043")
+                        const match = lastRow.dateLabel.match(/^(\d{2})\.(\d{4})$/);
+                        if (!match) return '—';
+                        
+                        const [, month, year] = match;
+                        const date = new Date(`${year}-${month}-01T00:00:00`);
+                        
+                        if (isNaN(date.getTime())) return '—';
+                        
+                        return date.toLocaleDateString('ru-RU', {
+                          year: 'numeric',
+                          month: 'long'
+                        });
+                      } catch {
+                        return '—';
+                      }
+                    })()}
                   </div>
                 </div>
               </div>
