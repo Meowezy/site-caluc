@@ -80,11 +80,11 @@ export async function buildExcelReport(params: {
     scheduleSheet.addRow({
       num: row.month,
       date: row.dateLabel || '',
-      payment: `${formatMoney(row.totalPayment)} ₽`,
+      payment: `${formatMoney(row.paymentTotal)} ₽`,
       interest: `${formatMoney(row.interest)} ₽`,
-      principal: `${formatMoney(row.principalPayment)} ₽`,
+      principal: `${formatMoney(row.principal)} ₽`,
       early: row.earlyPayment > 0 ? `${formatMoney(row.earlyPayment)} ₽` : '—',
-      balance: `${formatMoney(row.balance)} ₽`
+      balance: `${formatMoney(row.balanceAfter)} ₽`
     });
 
     // Zebra striping
