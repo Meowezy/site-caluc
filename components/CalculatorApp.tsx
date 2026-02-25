@@ -527,12 +527,12 @@ export default function CalculatorApp() {
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {/* Переплата */}
-                <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
+                <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px] overflow-hidden">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Переплата по процентам</div>
-                  <div className="text-lg sm:text-xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100">
+                  <div className="min-w-0 max-w-full text-lg sm:text-xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100 break-words">
                     {formatMoney(result.summary.totalInterest)}
                   </div>
-                  <div className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 tabular-nums">
+                  <div className="mt-1 min-w-0 max-w-full text-xs sm:text-sm text-slate-600 dark:text-slate-400 tabular-nums break-words leading-snug">
                     {(() => {
                       const interest = result.summary.totalInterest;
                       const total = result.summary.totalPaid;
@@ -544,23 +544,23 @@ export default function CalculatorApp() {
                 </div>
 
                 {/* Всего */}
-                <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
+                <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px] overflow-hidden">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Всего к оплате</div>
-                  <div className="text-lg sm:text-xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100">
+                  <div className="min-w-0 max-w-full text-lg sm:text-xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100 break-words">
                     {formatMoney(result.summary.totalPaid)}
                   </div>
-                  <div className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 tabular-nums">
-                    {(() => {
-                      const interest = result.summary.totalInterest;
-                      return interest > 0 ? `В т.ч. проценты: ${formatMoney(interest)}` : 'В т.ч. проценты: —';
-                    })()}
-                  </div>
+                  <div className="mt-1 min-w-0 max-w-full text-xs sm:text-sm text-slate-600 dark:text-slate-400 tabular-nums break-words leading-snug">
+                   {(() => {
+                     const interest = result.summary.totalInterest;
+                     return interest > 0 ? `В т.ч. проценты: ${formatMoney(interest)}` : 'В т.ч. проценты: —';
+                   })()}
+                 </div>
                 </div>
 
                 {/* Срок */}
-                <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
+                <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px] overflow-hidden">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Фактический срок</div>
-                  <div className="text-lg sm:text-xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100">
+                  <div className="min-w-0 max-w-full text-lg sm:text-xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100 break-words">
                     {(() => {
                       const actual = result.summary.actualMonths;
                       const years = Math.floor(actual / 12);
@@ -570,7 +570,7 @@ export default function CalculatorApp() {
                       return [yearsPart, monthsPart].filter(Boolean).join(' ') || `${actual} мес.`;
                     })()}
                   </div>
-                  <div className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 tabular-nums">
+                  <div className="mt-1 min-w-0 max-w-full text-xs sm:text-sm text-slate-600 dark:text-slate-400 tabular-nums break-words leading-snug">
                     {(() => {
                       const actual = result.summary.actualMonths;
                       const planned = Number.isFinite(termMonths) ? termMonths : undefined;
@@ -582,9 +582,9 @@ export default function CalculatorApp() {
                 </div>
 
                 {/* Последний платёж */}
-                <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
+                <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px] overflow-hidden">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Последний платёж</div>
-                  <div className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+                  <div className="min-w-0 max-w-full text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 break-words">
                     {(() => {
                       if (!result.schedule.length) return '—';
                       const lastRow = result.schedule[result.schedule.length - 1];
@@ -601,7 +601,7 @@ export default function CalculatorApp() {
                       }
                     })()}
                   </div>
-                  <div className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 tabular-nums">
+                  <div className="mt-1 min-w-0 max-w-full text-xs sm:text-sm text-slate-600 dark:text-slate-400 tabular-nums break-words leading-snug">
                     {(() => {
                       if (!result.schedule.length) return 'Сумма: —';
                       const lastRow = result.schedule[result.schedule.length - 1];
