@@ -9,6 +9,7 @@ import type { CalcRequest, CalcResponse, EarlyPayment } from '@/lib/types';
 import ScheduleCharts from '@/components/ScheduleCharts';
 import ScheduleTable from '@/components/ScheduleTable';
 import ExportPanel from '@/components/ExportPanel';
+import FadeInOnScroll from '@/components/FadeInOnScroll';
 
 const STORAGE_KEY = 'ccalc:v1';
 
@@ -493,6 +494,32 @@ export default function CalculatorApp() {
 
           {result ? (
             <div className="mt-4 space-y-5">
+              {/* Карточка экономии - показывается только если есть досрочные платежей */}
+              {result.summary.savedInterest && result.summary.savedInterest > 0 && (
+                <FadeInOnScroll>
+                <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 p-6 border-2 border-emerald-200 dark:border-emerald-800">
+                  <div className="flex items-start gap-4">
+                    <div className="text-4xl">💰</div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-1">
+                        Ваша экономия от досрочных платежей
+                      </div>
+                      <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-500 mb-2">
+                        {formatMoney(result.summary.savedInterest)}
+                      </div>
+                      <div className="text-sm text-emerald-700/80 dark:text-emerald-400/80">
+                        Без досрочных платежей переплата составила бы{' '}
+                        <span className="font-semibold">
+                          {formatMoney(result.summary.interestWithoutEarly || 0)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </FadeInOnScroll>
+              )}
+
+              <FadeInOnScroll delay={100}>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400">Переплата по процентам</div>
@@ -521,7 +548,9 @@ export default function CalculatorApp() {
                   </div>
                 </div>
               </div>
+              </FadeInOnScroll>
 
+              <FadeInOnScroll delay={200}>
               <ExportPanel
                 calcRequest={{
                   principal: Number.isFinite(principal) ? principal : 0,
@@ -536,15 +565,20 @@ export default function CalculatorApp() {
                   startDate
                 }}
               />
+              </FadeInOnScroll>
 
+              <FadeInOnScroll delay={300}>
               <ScheduleCharts rows={result.schedule} />
+              </FadeInOnScroll>
 
+              <FadeInOnScroll delay={400}>
               <div>
                 <div className="text-sm font-semibold">График платежей</div>
                 <div className="mt-3">
                   <ScheduleTable rows={result.schedule} />
                 </div>
               </div>
+              </FadeInOnScroll>
             </div>
           ) : (
             <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">

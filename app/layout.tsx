@@ -4,7 +4,7 @@ import SiteHeader from '@/components/SiteHeader';
 import ScrollToTopButton from '@/components/ScrollToTopButton';
 
 export const metadata: Metadata = {
-  title: 'Калькулятор кредита',
+  title: 'Калькулятор кредита — КредитПлан',
   description:
     'Современный калькулятор кредита: аннуитетные и дифференцированные платежи, досрочные погашения, график и экспорт в PDF.',
   keywords: [
@@ -13,11 +13,38 @@ export const metadata: Metadata = {
     'дифференцированный платеж',
     'досрочное погашение'
   ],
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' }
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
+    ]
+  },
+  manifest: '/manifest.json',
   openGraph: {
-    title: 'Калькулятор кредита',
+    title: 'Калькулятор кредита — КредитПлан',
     description:
-      'Рассчитайте график платежей с учётом досрочных погашений и скачайте отчёт.',
-    type: 'website'
+      'Рассчитайте график платежей с учётом досрочных погашений и скачайте отчёт в PDF.',
+    type: 'website',
+    locale: 'ru_RU',
+    siteName: 'КредитПлан',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'КредитПлан — Калькулятор кредита'
+      }
+    ]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Калькулятор кредита — КредитПлан',
+    description: 'Рассчитайте график платежей с учётом досрочных погашений.',
+    images: ['/og-image.png']
   },
   robots: {
     index: true,

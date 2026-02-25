@@ -56,6 +56,8 @@ export type CalcSummary = {
   totalInterest: number;
   totalEarlyPayments: number;
   actualMonths: number;
+  savedInterest?: number; // Экономия на процентах благодаря досрочным платежам
+  interestWithoutEarly?: number; // Проценты без досрочных платежей (для сравнения)
 };
 
 export type CalcResponse = {

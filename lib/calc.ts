@@ -252,11 +252,29 @@ export function calculateSchedule(req: CalcRequest): CalcResponse {
     throw new Error('Слишком большой срок расчёта (guard). Проверьте входные данные.');
   }
 
+  // Calculate what interest would be WITHOUT early payments (for savings comparison)
+  let interestWithoutEarly = 0;
+  if (totalEarly > 0) {
+    // Re-calculate with no early payments
+    const reqNoEarly: CalcRequest = { ...req, earlyPayments: [] };
+    try {
+      const resultNoEarly = computeLoanSchedule(reqNoEarly);
+      interestWithoutEarly = toCents(resultNoEarly.summary.totalInterest);
+    } catch {
+      // If calculation fails, just skip
+      interestWithoutEarly = 0;
+    }
+  }
+
+  const savedInterest = interestWithoutEarly > 0 ? interestWithoutEarly - totalInterest : 0;
+
   const summary = {
     totalPaid: fromCents(totalPaid),
     totalInterest: fromCents(totalInterest),
     totalEarlyPayments: fromCents(totalEarly),
-    actualMonths: schedule.length
+    actualMonths: schedule.length,
+    savedInterest: fromCents(savedInterest),
+    interestWithoutEarly: fromCents(interestWithoutEarly)
   };
 
   return { summary, schedule };
