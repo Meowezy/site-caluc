@@ -525,7 +525,7 @@ export default function CalculatorApp() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {/* Переплата */}
                 <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px] overflow-hidden">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Переплата по процентам</div>
