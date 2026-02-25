@@ -1,13 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
-import { requestSchema } from '@/lib/types';
-import { computeLoanSchedule } from '@/lib/calc';
+import { calculateSchedule } from '@/lib/calc';
 import { buildExcelReport } from '@/lib/excel';
+
+const earlyPaymentSchema = z.object({
+  id: z.string(),
+  amount: z.number().positive(),
+  monthIndex: z.number().int().min(1),
+  mode: z.enum(['REDUCE_TERM', 'REDUCE_PAYMENT']),
+  repeat: z.enum(['ONCE', 'MONTHLY', 'QUARTERLY', 'UNTIL_END']).default('ONCE')
+});
+
+const reqSchema = z.object({
+  principal: z.number().positive(),
+  annualRate: z.number().min(0),
+  termMonths: z.number().int().positive(),
+  paymentType: z.enum(['ANNUITY', 'DIFFERENTIATED']),
+  startDate: z.string().optional(),
+  earlyPayments: z.array(earlyPaymentSchema)
+});
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const validated = requestSchema.safeParse(body);
+    const validated = reqSchema.safeParse(body);
 
     if (!validated.success) {
       return NextResponse.json(
@@ -16,7 +33,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = computeLoanSchedule(validated.data);
+    const result = calculateSchedule(validated.data);
     const excelBytes = await buildExcelReport({
       request: validated.data,
       result
