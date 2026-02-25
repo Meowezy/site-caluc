@@ -258,7 +258,7 @@ export function calculateSchedule(req: CalcRequest): CalcResponse {
     // Re-calculate with no early payments
     const reqNoEarly: CalcRequest = { ...req, earlyPayments: [] };
     try {
-      const resultNoEarly = computeLoanSchedule(reqNoEarly);
+      const resultNoEarly = calculateSchedule(reqNoEarly);
       interestWithoutEarly = toCents(resultNoEarly.summary.totalInterest);
     } catch {
       // If calculation fails, just skip
