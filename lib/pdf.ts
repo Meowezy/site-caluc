@@ -270,9 +270,9 @@ export async function buildPdfReport(params: {
   // Embed logo
   let logoImage: any;
   try {
-    const logoPath = join(process.cwd(), 'logo.jpg');
+    const logoPath = join(process.cwd(), 'logo.png');
     const logoBytes = readFileSync(logoPath);
-    logoImage = await pdfDoc.embedJpg(logoBytes);
+    logoImage = await pdfDoc.embedPng(logoBytes);
   } catch {
     // Logo not available, skip
     logoImage = null;

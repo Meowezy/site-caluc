@@ -494,9 +494,8 @@ export default function CalculatorApp() {
 
           {result ? (
             <div className="mt-4 space-y-5">
-              {/* Карточка экономии - показывается только если есть досрочные платежей */}
+              {/* Карточка экономии - показывается только если есть досрочные платежи */}
               {result.summary.savedInterest && result.summary.savedInterest > 0 && (
-                <FadeInOnScroll>
                 <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 p-6 border-2 border-emerald-200 dark:border-emerald-800">
                   <div className="flex items-start gap-4">
                     <div className="text-4xl">💰</div>
@@ -516,41 +515,43 @@ export default function CalculatorApp() {
                     </div>
                   </div>
                 </div>
-                </FadeInOnScroll>
               )}
 
-              <FadeInOnScroll delay={100}>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
-                  <div className="text-xs text-slate-500 dark:text-slate-400">Переплата по процентам</div>
-                  <div className="mt-2 text-xl font-semibold">
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Переплата по процентам</div>
+                  <div className="text-lg font-semibold break-words">
                     {formatMoney(result.summary.totalInterest)}
                   </div>
                 </div>
                 <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
-                  <div className="text-xs text-slate-500 dark:text-slate-400">Всего к оплате</div>
-                  <div className="mt-2 text-xl font-semibold">{formatMoney(result.summary.totalPaid)}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Всего к оплате</div>
+                  <div className="text-lg font-semibold break-words">{formatMoney(result.summary.totalPaid)}</div>
                 </div>
                 <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400">Фактический срок</div>
                   <div className="mt-2 text-xl font-semibold">{formatTerm(result.summary.actualMonths)}</div>
                 </div>
                 <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
-                  <div className="text-xs text-slate-500 dark:text-slate-400">Последний платёж</div>
-                  <div className="mt-2 text-xl font-semibold">
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Последний платёж</div>
+                  <div className="text-lg font-semibold break-words">
                     {result.schedule.length > 0 && result.schedule[result.schedule.length - 1].dateLabel
-                      ? new Date(result.schedule[result.schedule.length - 1].dateLabel + 'T00:00:00')
-                          .toLocaleDateString('ru-RU', {
-                            year: 'numeric',
-                            month: 'long'
-                          })
+                      ? (() => {
+                          try {
+                            const lastDate = result.schedule[result.schedule.length - 1].dateLabel;
+                            return new Date(lastDate + 'T00:00:00').toLocaleDateString('ru-RU', {
+                              year: 'numeric',
+                              month: 'long'
+                            });
+                          } catch {
+                            return '—';
+                          }
+                        })()
                       : '—'}
                   </div>
                 </div>
               </div>
-              </FadeInOnScroll>
 
-              <FadeInOnScroll delay={200}>
               <ExportPanel
                 calcRequest={{
                   principal: Number.isFinite(principal) ? principal : 0,
@@ -565,20 +566,15 @@ export default function CalculatorApp() {
                   startDate
                 }}
               />
-              </FadeInOnScroll>
 
-              <FadeInOnScroll delay={300}>
               <ScheduleCharts rows={result.schedule} />
-              </FadeInOnScroll>
 
-              <FadeInOnScroll delay={400}>
               <div>
                 <div className="text-sm font-semibold">График платежей</div>
                 <div className="mt-3">
                   <ScheduleTable rows={result.schedule} />
                 </div>
               </div>
-              </FadeInOnScroll>
             </div>
           ) : (
             <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">

@@ -1,4 +1,6 @@
 import ExcelJS from 'exceljs';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { CalcRequest, CalcResponse } from '@/lib/types';
 
 export async function buildExcelReport(params: {
@@ -11,6 +13,19 @@ export async function buildExcelReport(params: {
   workbook.creator = 'КредитПлан';
   workbook.created = new Date();
 
+  // Try to add logo to workbook
+  let logoId: string | undefined;
+  try {
+    const logoPath = join(process.cwd(), 'logo.png');
+    const logoBuffer = readFileSync(logoPath);
+    logoId = workbook.addImage({
+      buffer: logoBuffer,
+      extension: 'png'
+    });
+  } catch {
+    // Logo not available, skip
+  }
+
   // Sheet 1: Summary
   const summarySheet = workbook.addWorksheet('Итоги');
   
@@ -18,6 +33,15 @@ export async function buildExcelReport(params: {
     { key: 'param', width: 30 },
     { key: 'value', width: 25 }
   ];
+
+  // Add logo to summary sheet if available
+  if (logoId) {
+    summarySheet.addImage(logoId, {
+      tl: { col: 0, row: 0 },
+      ext: { width: 80, height: 80 }
+    });
+    summarySheet.getRow(1).height = 60;
+  }
 
   summarySheet.addRow({ param: 'ПАРАМЕТРЫ КРЕДИТА', value: '' });
   summarySheet.addRow({ param: 'Сумма кредита', value: `${formatMoney(request.principal)} ₽` });
