@@ -14,7 +14,7 @@ export async function buildExcelReport(params: {
   workbook.created = new Date();
 
   // Try to add logo to workbook
-  let logoId: string | undefined;
+  let logoId: number | undefined;
   try {
     const logoPath = join(process.cwd(), 'logo.png');
     const logoBuffer = readFileSync(logoPath);
