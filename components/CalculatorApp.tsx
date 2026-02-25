@@ -375,22 +375,22 @@ export default function CalculatorApp() {
         </div>
 
         <div className="card p-4 md:p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="min-w-0">
               <div className="text-base font-semibold">Досрочные погашения</div>
               <div className="hint">
                 Укажите месяц (1 = первый платёж), сумму и режим пересчёта.
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
               <button
-                className="btn-secondary"
+                className="btn-secondary w-full sm:w-auto"
                 onClick={() => setEarlyPayments([])}
                 disabled={earlyPayments.length === 0}
               >
                 Сбросить
               </button>
-              <button className="btn" onClick={addEarlyPayment}>
+              <button className="btn w-full sm:w-auto" onClick={addEarlyPayment}>
                 Добавить
               </button>
             </div>
@@ -485,8 +485,8 @@ export default function CalculatorApp() {
                   </div>
                 </div>
 
-                <div className="mt-3 flex justify-end">
-                  <button className="btn-secondary" onClick={() => removeEarlyPayment(ep.id)}>
+                <div className="mt-3 flex justify-stretch sm:justify-end">
+                  <button className="btn-secondary w-full sm:w-auto" onClick={() => removeEarlyPayment(ep.id)}>
                     Удалить
                   </button>
                 </div>
@@ -526,45 +526,120 @@ export default function CalculatorApp() {
               )}
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
+                {/* Переплата */}
+                <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Переплата по процентам</div>
-                  <div className="text-lg font-semibold break-words">
-                    {formatMoney(result.summary.totalInterest)}
+                  <div
+                    className="text-[15px] sm:text-base font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap overflow-hidden text-ellipsis"
+                    title={formatMoney(result.summary.totalInterest)}
+                  >
+                    {(() => {
+                      const interest = result.summary.totalInterest;
+                      const total = result.summary.totalPaid;
+                      const share = total > 0 ? (interest / total) * 100 : 0;
+                      const shareLabel = Number.isFinite(share) && share > 0 ? `${share.toFixed(1)}%` : undefined;
+                      const parts = [formatMoney(interest), shareLabel ? `• ${shareLabel}` : undefined].filter(
+                        (p): p is string => Boolean(p)
+                      );
+                      return parts.join(' ');
+                    })()}
                   </div>
                 </div>
-                <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
+
+                {/* Всего */}
+                <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Всего к оплате</div>
-                  <div className="text-lg font-semibold break-words">{formatMoney(result.summary.totalPaid)}</div>
+                  <div
+                    className="text-[15px] sm:text-base font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap overflow-hidden text-ellipsis"
+                    title={formatMoney(result.summary.totalPaid)}
+                  >
+                    {(() => {
+                      const total = result.summary.totalPaid;
+                      const interest = result.summary.totalInterest;
+                      const extraLabel = interest > 0 ? `• +${formatMoney(interest)}` : undefined;
+                      const parts = [formatMoney(total), extraLabel].filter((p): p is string => Boolean(p));
+                      return parts.join(' ');
+                    })()}
+                  </div>
                 </div>
-                <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
-                  <div className="text-xs text-slate-500 dark:text-slate-400">Фактический срок</div>
-                  <div className="mt-2 text-xl font-semibold">{formatTerm(result.summary.actualMonths)}</div>
+
+                {/* Срок */}
+                <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Фактический срок</div>
+                  <div
+                    className="text-[15px] sm:text-base font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap overflow-hidden text-ellipsis"
+                    title={formatTerm(result.summary.actualMonths)}
+                  >
+                    {(() => {
+                      const actual = result.summary.actualMonths;
+                      const planned = Number.isFinite(termMonths) ? termMonths : undefined;
+                      const saved = planned && planned > 0 ? planned - actual : 0;
+                      const savedLabel = saved > 0 ? `• −${saved} мес.` : undefined;
+                      const parts = [formatTerm(actual), savedLabel].filter((p): p is string => Boolean(p));
+                      return parts.join(' ');
+                    })()}
+                  </div>
                 </div>
-                <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
+
+                {/* Последний платёж */}
+                <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 min-h-[92px]">
                   <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">Последний платёж</div>
-                  <div className="text-lg font-semibold break-words">
+                  <div
+                    className="text-[15px] sm:text-base font-semibold tabular-nums tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap overflow-hidden text-ellipsis"
+                    title={(() => {
+                      if (!result.schedule.length) return '—';
+                      const lastRow = result.schedule[result.schedule.length - 1];
+
+                      const lastAmount = Number.isFinite(lastRow.paymentTotal)
+                        ? formatMoney(lastRow.paymentTotal)
+                        : undefined;
+
+                      const monthLabel = (() => {
+                        if (!lastRow.dateLabel) return undefined;
+                        try {
+                          const match = lastRow.dateLabel.match(/^(\\d{2})\\.(\\d{4})$/);
+                          if (!match) return undefined;
+                          const [, month, year] = match;
+                          const date = new Date(`${year}-${month}-01T00:00:00`);
+                          if (isNaN(date.getTime())) return undefined;
+                          return date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long' });
+                        } catch {
+                          return undefined;
+                        }
+                      })();
+
+                      const parts = [monthLabel, lastAmount].filter((p): p is string => Boolean(p));
+                      return parts.length ? parts.join(' • ') : '—';
+                    })()}
+                  >
                     {(() => {
                       if (!result.schedule.length) return '—';
                       const lastRow = result.schedule[result.schedule.length - 1];
-                      if (!lastRow.dateLabel) return '—';
-                      
-                      try {
-                        // Format is "MM.yyyy" from calc.ts (e.g., "12.2043")
-                        const match = lastRow.dateLabel.match(/^(\d{2})\.(\d{4})$/);
-                        if (!match) return '—';
-                        
-                        const [, month, year] = match;
-                        const date = new Date(`${year}-${month}-01T00:00:00`);
-                        
-                        if (isNaN(date.getTime())) return '—';
-                        
-                        return date.toLocaleDateString('ru-RU', {
-                          year: 'numeric',
-                          month: 'long'
-                        });
-                      } catch {
-                        return '—';
-                      }
+
+                      const lastAmount = Number.isFinite(lastRow.paymentTotal)
+                        ? formatMoney(lastRow.paymentTotal)
+                        : undefined;
+
+                      const monthLabel = (() => {
+                        if (!lastRow.dateLabel) return undefined;
+                        try {
+                          // Format is "MM.yyyy" from calc.ts (e.g., "12.2043")
+                          const match = lastRow.dateLabel.match(/^(\\d{2})\\.(\\d{4})$/);
+                          if (!match) return undefined;
+
+                          const [, month, year] = match;
+                          const date = new Date(`${year}-${month}-01T00:00:00`);
+                          if (isNaN(date.getTime())) return undefined;
+
+                          return date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'short' }).replace('.', '');
+                        } catch {
+                          return undefined;
+                        }
+                      })();
+
+                      const parts = [monthLabel, lastAmount].filter((p): p is string => Boolean(p));
+                      const text = parts.length ? parts.join(' • ') : '—';
+                      return text;
                     })()}
                   </div>
                 </div>
