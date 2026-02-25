@@ -39,17 +39,15 @@ export default function SiteHeader() {
           <div className="flex items-center gap-2">
             <a
               href="/articles"
-              className="inline-flex items-center px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-bank-600 dark:hover:text-bank-500 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
+              className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-bank-600 dark:hover:text-bank-500 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
             >
-              📚
-              <span className="hidden xs:inline ml-1">Статьи</span>
+              Статьи
             </a>
             <a
               href="/about"
-              className="inline-flex items-center px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-bank-600 dark:hover:text-bank-500 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
+              className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-bank-600 dark:hover:text-bank-500 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
             >
-              ℹ️
-              <span className="hidden xs:inline ml-1">О сервисе</span>
+              О сервисе
             </a>
             <ThemeToggle />
           </div>

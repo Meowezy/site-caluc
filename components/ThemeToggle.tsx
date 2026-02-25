@@ -56,7 +56,7 @@ export default function ThemeToggle() {
   }
 
   const baseBtn =
-    'relative inline-flex h-9 w-9 items-center justify-center rounded-full transition ' +
+    'relative inline-flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full transition ' +
     'focus:outline-none focus-visible:ring-4 focus-visible:ring-bank-50 dark:focus-visible:ring-bank-600/20';
 
   const active =
@@ -80,7 +80,7 @@ export default function ThemeToggle() {
         title="Светлая тема"
         aria-label="Светлая тема"
       >
-        <SunIcon className="block h-5 w-5" />
+        <SunIcon className="block h-5 w-5 sm:h-4 sm:w-4" />
       </button>
       <button
         type="button"
@@ -89,7 +89,7 @@ export default function ThemeToggle() {
         title="Тёмная тема"
         aria-label="Тёмная тема"
       >
-        <MoonIcon className="block h-5 w-5" />
+        <MoonIcon className="block h-5 w-5 sm:h-4 sm:w-4" />
       </button>
     </div>
   );
