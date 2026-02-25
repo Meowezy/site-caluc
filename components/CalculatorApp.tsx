@@ -492,7 +492,7 @@ export default function CalculatorApp() {
           {result ? (
             <div className="mt-4 space-y-5">
               {/* Карточка экономии - показывается только если есть досрочные платежи */}
-              {result.summary.savedInterest && result.summary.savedInterest > 0 && (
+              {!!(result.summary.savedInterest && result.summary.savedInterest > 0) && (
                 <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 p-6 border-2 border-emerald-200 dark:border-emerald-800">
                   <div className="flex items-start gap-4">
                     <div className="text-4xl">💰</div>
