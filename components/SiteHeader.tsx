@@ -24,28 +24,28 @@ export default function SiteHeader() {
         (scrolled ? 'shadow-sm shadow-slate-900/5 dark:shadow-black/20' : 'shadow-none')
       }
     >
-      <div className="container-page py-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <LogoMark className="h-10 w-10 shrink-0" />
-            <div className="leading-tight">
-              <div className="text-lg font-semibold tracking-tight">КредитПлан</div>
-              <div className="text-sm text-slate-500 dark:text-slate-400">
+      <div className="container-page py-3 sm:py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <LogoMark className="h-9 w-9 sm:h-10 sm:w-10 shrink-0" />
+            <div className="min-w-0 leading-tight">
+              <div className="text-base sm:text-lg font-semibold tracking-tight truncate">КредитПлан</div>
+              <div className="hidden sm:block text-sm text-slate-500 dark:text-slate-400">
                 Калькулятор кредита.
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
             <a
               href="/articles"
-              className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-bank-600 dark:hover:text-bank-500 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
+              className="inline-flex items-center px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-bank-600 dark:hover:text-bank-500 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
             >
               Статьи
             </a>
             <a
               href="/about"
-              className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-bank-600 dark:hover:text-bank-500 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
+              className="inline-flex items-center px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-bank-600 dark:hover:text-bank-500 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
             >
               О сервисе
             </a>

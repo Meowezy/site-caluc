@@ -56,19 +56,22 @@ export default function ThemeToggle() {
   }
 
   const baseBtn =
-    'relative inline-flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full transition ' +
+    'relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full transition ' +
     'focus:outline-none focus-visible:ring-4 focus-visible:ring-bank-50 dark:focus-visible:ring-bank-600/20';
 
+  // Stronger contrast so icons remain visible on mobile and on translucent headers.
   const active =
-    'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200 dark:bg-slate-950 dark:text-slate-50 dark:ring-slate-800';
+    'bg-white text-slate-950 shadow-sm ring-1 ring-slate-300 ' +
+    'dark:bg-slate-950 dark:text-slate-50 dark:ring-slate-700';
   const inactive =
-    'text-slate-500 hover:text-slate-700 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60';
+    'text-slate-700 hover:text-slate-950 hover:bg-white/70 ' +
+    'dark:text-slate-300 dark:hover:text-slate-50 dark:hover:bg-slate-800/60';
 
   return (
     <div
       className={
-        'inline-flex items-center gap-1 rounded-full bg-slate-100 p-1 ring-1 ring-slate-200 ' +
-        'dark:bg-slate-900/60 dark:ring-slate-800'
+        'inline-flex items-center gap-1 rounded-full bg-slate-200/70 p-1 ring-1 ring-slate-300 ' +
+        'dark:bg-slate-900/70 dark:ring-slate-700'
       }
       role="group"
       aria-label="Переключатель темы"
@@ -80,7 +83,7 @@ export default function ThemeToggle() {
         title="Светлая тема"
         aria-label="Светлая тема"
       >
-        <SunIcon className="block h-5 w-5 sm:h-4 sm:w-4" />
+        <SunIcon className="block h-4 w-4 sm:h-5 sm:w-5" />
       </button>
       <button
         type="button"
@@ -89,7 +92,7 @@ export default function ThemeToggle() {
         title="Тёмная тема"
         aria-label="Тёмная тема"
       >
-        <MoonIcon className="block h-5 w-5 sm:h-4 sm:w-4" />
+        <MoonIcon className="block h-4 w-4 sm:h-5 sm:w-5" />
       </button>
     </div>
   );
